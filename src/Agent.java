@@ -14,7 +14,8 @@ public class Agent {
    public char get_action( char view[][] ) {
 
       // REPLACE THIS CODE WITH AI TO CHOOSE ACTION
-	  System.out.println(ai.makeMove());
+	  //System.out.println(ai.makeMove());
+	   ai.updatePosition(view);
 
       int ch=0;
 
@@ -71,7 +72,7 @@ public class Agent {
       int ch;
       int i,j;
       
-      agent.ai = new Onlymove();
+      agent.ai = new Move();
 
       if( args.length < 2 ) {
          System.out.println("Usage: java Agent -p <port>\n");
