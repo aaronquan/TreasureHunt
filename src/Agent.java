@@ -15,16 +15,18 @@ public class Agent {
 
       // REPLACE THIS CODE WITH AI TO CHOOSE ACTION
 	  //System.out.println(ai.makeMove());
-	   ai.updatePosition(view);
+	  ai.updatePosition(view);
 
       int ch=0;
 
       //System.out.print("Enter Action(s): ");
 
-      //try {
+      try {
          while ( ch != -1 ) {
             // read character from keyboard
-            ch  = ai.makeMove();
+            ch = ai.makeMove();
+            ch = System.in.read();
+            ai.lastMove(ch);
 
             switch( ch ) { // if character is a valid action, return it
             case 'F': case 'L': case 'R': case 'C': case 'U': case 'B':
@@ -32,10 +34,10 @@ public class Agent {
                return((char) ch );
             }
          }
-      //}
-      //catch (IOException e) {
-      //   System.out.println ("IO error:" + e );
-      //}
+      }
+      catch (IOException e) {
+         System.out.println ("IO error:" + e );
+      }
 
       return 0;
    }

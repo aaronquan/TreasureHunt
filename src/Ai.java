@@ -1,8 +1,7 @@
 
 public interface Ai {
-	static final int mapSize = 80;
 	
 	public char makeMove();
-
+	public void lastMove(int c);
 	public void updatePosition(char[][] view);
 }
