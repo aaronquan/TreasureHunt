@@ -15,6 +15,7 @@ public class Agent {
 
       // REPLACE THIS CODE WITH AI TO CHOOSE ACTION
 	  //System.out.println(ai.makeMove());
+	  if (ai != null)
 	  ai.updatePosition(view);
 
       int ch=0;
@@ -24,8 +25,10 @@ public class Agent {
       try {
          while ( ch != -1 ) {
             // read character from keyboard
+        	if (ai != null)
             ch = ai.makeMove();
             ch = System.in.read();
+            if (ai != null)
             ai.lastMove(ch);
 
             switch( ch ) { // if character is a valid action, return it
@@ -93,7 +96,7 @@ public class Agent {
          System.exit(-1);
       }
 
-      try { // scan 5-by-5 wintow around current location
+      try { // scan 5-by-5 window around current location
          while( true ) {
             for( i=0; i < 5; i++ ) {
                for( j=0; j < 5; j++ ) {
