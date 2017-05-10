@@ -47,4 +47,8 @@ public enum Direction {
 		return v;
 	}
 	
+	public Direction copy(){
+		return values()[this.ordinal()];
+	}
+	
 }

@@ -20,14 +20,18 @@ public class Agent {
 
       int ch=0;
 
-      //System.out.print("Enter Action(s): ");
+      System.out.print("Enter Action(s): ");
 
       try {
          while ( ch != -1 ) {
             // read character from keyboard
+        	ch = System.in.read();
+        	
         	if (ai != null)
             ch = ai.makeMove();
-            ch = System.in.read();
+        	
+            //ch = System.in.read();
+        	
             if (ai != null)
             ai.lastMove(ch);
 

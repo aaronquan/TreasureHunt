@@ -88,6 +88,9 @@ public class GlobalMap {
 	public char[][] getMap(){
 		return map;
 	}
+	public int getMapSize(){
+		return mapSize;
+	}
 	
 	public void printMap(){
 		System.out.println("Global Map");
