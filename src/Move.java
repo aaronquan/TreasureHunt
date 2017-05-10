@@ -149,4 +149,9 @@ public class Move implements Ai{
 		}
 		return steps;
 	}
+	
+	
+	public int nMoves(){
+		return moves;
+	}
 }

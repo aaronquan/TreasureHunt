@@ -22,10 +22,10 @@ public class Agent {
 
       System.out.print("Enter Action(s): ");
 
-      try {
+      //try {
          while ( ch != -1 ) {
             // read character from keyboard
-        	ch = System.in.read();
+        	//ch = System.in.read();
         	
         	if (ai != null)
             ch = ai.makeMove();
@@ -41,10 +41,10 @@ public class Agent {
                return((char) ch );
             }
          }
-      }
-      catch (IOException e) {
-         System.out.println ("IO error:" + e );
-      }
+      //}
+      //catch (IOException e) {
+      //   System.out.println ("IO error:" + e );
+      //}
 
       return 0;
    }
