@@ -1,15 +1,15 @@
 
 public interface Ai {
 	
-	public char makeMove();
+	public char makeMove(char[][] view);
 	
 	//to remove
-	public void lastMove(int c);
+	//public void lastMove(int c);
 	
 	//to remove
-	public void updatePosition(char[][] view);
+	//public void updatePosition(char[][] view);
 	
 	//to remove
-	public int nMoves();
+	//public int nMoves();
 	
 }

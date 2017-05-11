@@ -15,8 +15,6 @@ public class Agent {
 
       // REPLACE THIS CODE WITH AI TO CHOOSE ACTION
 	  //System.out.println(ai.makeMove());
-	  if (ai != null)
-	  ai.updatePosition(view);
 
       int ch=0;
 
@@ -28,12 +26,9 @@ public class Agent {
         	//ch = System.in.read();
         	
         	if (ai != null)
-            ch = ai.makeMove();
+            ch = ai.makeMove(view);
         	
             //ch = System.in.read();
-        	
-            if (ai != null)
-            ai.lastMove(ch);
 
             switch( ch ) { // if character is a valid action, return it
             case 'F': case 'L': case 'R': case 'C': case 'U': case 'B':
@@ -81,7 +76,7 @@ public class Agent {
       int ch;
       int i,j;
       
-      agent.ai = new Move();
+      agent.ai = new Move(); //change ai here
 
       if( args.length < 2 ) {
          System.out.println("Usage: java Agent -p <port>\n");

@@ -1,13 +1,24 @@
+//The map for the treasure game using relative coordinates to the starting position
+//Used to abstract the map generation from the ai
+//Holds key information for objects of the map and their whereabouts
 
+import java.util.*;
 public class TreasureMap {
 	private static final int mapSize = 180;
 	
 	private static final int centre = mapSize/2;
+	
+	private static final int viewOffset = 2;
 	//centre of the map is (0, 0)
 	
 	private char map[][]; //takes [y][x] coordinates
 	private int[] dimensions; //specifies the active parts of the map rectangle
 	//[topleft-x, topleft-y, width, height]
+	
+	private int[] treasure; //position of the treasure
+	private boolean treasureFound;
+	
+	private LinkedList<Integer[]> trees; //TO DO
 	
 	
 	public TreasureMap(){
@@ -18,10 +29,15 @@ public class TreasureMap {
 			}
 		}
 		dimensions = new int[4];
-		dimensions[0] = centre - 2;
-		dimensions[1] = centre - 2;
+		dimensions[0] = centre - viewOffset;
+		dimensions[1] = centre - viewOffset;
 		dimensions[2] = 0;
 		dimensions[3] = 0;
+		
+		treasure = new int[2];
+		treasureFound = false;
+		
+		trees = new LinkedList<Integer[]>();
 	}
 	
 	
@@ -30,8 +46,13 @@ public class TreasureMap {
 		assert(view[0].length > 0);
 		for(int j = 0; j < view.length; j++){
 			for(int i = 0; i < view[0].length; i++){
+				
 				map[j+dimensions[1]][i+dimensions[0]] = view[j][i];
 				if(i == 2 && j == 2) map[j+dimensions[1]][i+dimensions[0]] = '^';
+				if(view[j][i] == '$'){
+					treasureFound = true;
+					treasure[0] = i - viewOffset; treasure[1] = j - viewOffset;
+				}
 			}
 		}
 		dimensions[2] = view.length;
@@ -40,43 +61,59 @@ public class TreasureMap {
 	public void updateMap(char view[], Direction d, int[] pos){
 		int cx = centre+pos[0];
 		int cy = centre+pos[1];
-		int offset = 2;
+		//int offset = 2;
 		switch(d){
 		case NORTH:
-			if(cy-offset < dimensions[1]){
+			if(cy-viewOffset < dimensions[1]){
 				dimensions[1] -= 1;
 				dimensions[3] += 1;
 			}
 			for(int i = 0; i < view.length; i++){
-				map[cy-offset][cx-offset+i] = view[i];
+				map[cy-viewOffset][cx+i-viewOffset] = view[i];
+				if(view[i] == '$'){
+					treasureFound = true;
+					treasure[0] = pos[0]+i-viewOffset; treasure[1] = pos[1]-viewOffset;
+				}
 			}
 			System.out.println("north");
 			break;
 		case EAST:
-			if(cx+offset >= dimensions[0]+dimensions[2]){
+			if(cx+viewOffset >= dimensions[0]+dimensions[2]){
 				dimensions[2] += 1;
 			}
 			for(int i = 0; i < view.length; i++){
-				map[cy-offset+i][cx+offset] = view[i];
+				map[cy-viewOffset+i][cx+viewOffset] = view[i];
+				if(view[i] == '$'){
+					treasureFound = true;
+					treasure[0] = pos[0]+viewOffset; treasure[1] = pos[1]+i-viewOffset;
+				}
 			}
 			System.out.println("east");
 			break;
 		case SOUTH:
-			if(cy+offset >= dimensions[1]+dimensions[3]){
+			if(cy+viewOffset >= dimensions[1]+dimensions[3]){
 				dimensions[3] += 1;
 			}
 			for(int i = 0; i < view.length; i++){
-				map[cy+offset][cx-offset+i] = view[view.length-1-i];
+				map[cy+viewOffset][cx+i-viewOffset] = view[view.length-1-i];
+				if(view[i] == '$'){
+					treasureFound = true;
+					treasure[0] = pos[0]+i-viewOffset; treasure[1] = pos[1]+viewOffset;
+				}
 			}
 			System.out.println("south");
 			break;
 		case WEST:
-			if(cx-offset < dimensions[0]){
+			if(cx-viewOffset < dimensions[0]){
 				dimensions[0] -= 1;
 				dimensions[2] += 1;
 			}
 			for(int i = 0; i < view.length; i++){
-				map[cy-offset+i][cx-offset] = view[view.length-1-i];
+				map[cy+i-viewOffset][cx-viewOffset] = view[view.length-1-i];
+				if(view[i] == '$'){
+					treasureFound = true;
+					treasure[0] = pos[0]-viewOffset; treasure[1] = pos[1]+i-viewOffset;
+				}
 			}
 			System.out.println("west");
 			break;
@@ -126,5 +163,23 @@ public class TreasureMap {
 	}
 	public void changePlayerDirection(int[] pos, Direction d){
 		map[centre+pos[1]][centre+pos[0]] = d.getDirectionalChar();
+	}
+	
+	//map coordinates to relative coordinates
+	private int[] toRelativeCoordinates(int[] tmc){
+		int[] r = {tmc[0]-centre, tmc[1]-centre};
+		return r;
+	}
+	
+	// check t[0] for true or false: 0 - false, 1 - true, 
+	// t[1] and t[2] specify coordinates
+	public int[] isTreasureFound(){
+		int[] t = new int[3];
+		if(treasureFound){
+			t[0] = 1; t[1] = treasure[0]; t[2] = treasure[1];
+		}else{
+			t[0] = 0;
+		}
+		return t;
 	}
 }

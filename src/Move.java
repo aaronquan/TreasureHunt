@@ -1,6 +1,9 @@
 import java.util.*;
 
-//first ai just moves around the map
+//first ai just moves around the map using dfs and generates the treasure map
+//can only move to goals 1 step away from current position.
+
+//uses a next commands list to move to goals
 
 public class Move implements Ai{
 	private static final int mOffset = 80;
@@ -41,7 +44,36 @@ public class Move implements Ai{
 		toVisit.add(i);
 		nextCommands = new LinkedList<Character>();
 	}
-	public void updatePosition(char view[][]){
+	
+	//function called by the agent to decide a move
+	public char makeMove(char view[][]){
+		//update the position based on the last move
+		updatePosition(view);
+		
+		char move = 'f';
+		//takes move from the commands set by a previous move
+		//shouldn't matter since game doesnt change dynamically
+		if (!nextCommands.isEmpty()){
+			move = nextCommands.remove(0);
+		}
+		else if (!toVisit.isEmpty()){
+			//creates a new list of moves from a list of goals
+			Integer[] cp = toVisit.remove(toVisit.size()-1);
+			addDirectionsToVisit(cp);
+			visited[cp[0]+mOffset][cp[1]+mOffset] = true;
+			
+			nextCommands = findSteps(cp);
+			
+			if(!nextCommands.isEmpty()){
+				move = nextCommands.remove(0);
+			}
+		}
+	  	moves++;
+	  	lastMove = move;
+	  	return move;
+  	}
+	
+	private void updatePosition(char view[][]){
 		if (moves == 0){
 			//add starting view to map
 			//map.movePlayer(new int[2]);
@@ -55,27 +87,6 @@ public class Move implements Ai{
 			updatePositionFromLastMove(view);		
 		}
 		map.printMap();
-	}
-	public char makeMove(){
-		char move = 'f';
-		if (!nextCommands.isEmpty()){
-			move = nextCommands.remove(0);
-		}
-		else if (!toVisit.isEmpty()){
-			Integer[] cp = toVisit.remove(toVisit.size()-1);
-			addDirectionsToVisit(cp);
-			visited[cp[0]+mOffset][cp[1]+mOffset] = true;
-			
-			nextCommands = findSteps(cp);
-			if(!nextCommands.isEmpty()){
-				move = nextCommands.remove(0);
-			}
-		}
-	  	moves++;
-	  	return move;
-  	}
-	public void lastMove(int c){
-		lastMove = c;
 	}
 	
 	private void addToPosition(int x, int y){
@@ -119,6 +130,7 @@ public class Move implements Ai{
 	
 	//finds a sequence of steps to new direction
 	//currently only for max 1 forward steps to the goal 
+	//does not take into account walls or water that is done when adding goal directions
 	private List<Character> findSteps(Integer[] goal){
 		List<Character> steps = new LinkedList<Character>();
 		Direction dl = currentDirection.copy().turnLeft();
@@ -152,9 +164,5 @@ public class Move implements Ai{
 		}
 		return steps;
 	}
-	
-	
-	public int nMoves(){
-		return moves;
-	}
+
 }
