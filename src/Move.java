@@ -3,6 +3,7 @@ import java.util.*;
 //first ai just moves around the map
 
 public class Move implements Ai{
+	private static final int mOffset = 80;
 	
 	private int[] position; //starting at 0,0
 	
@@ -14,7 +15,7 @@ public class Move implements Ai{
 	private int lastMove;
 	
 	
-	//private boolean[][] visited;
+	private boolean[][] visited;
 	private List<Integer[]> toVisit;
 	
 	private List<Character> nextCommands;
@@ -26,7 +27,7 @@ public class Move implements Ai{
 		currentDirection = Direction.NORTH;
 		map = new GlobalMap();
 		
-		/*
+		
 		int s = map.getMapSize();
 		visited = new boolean[s][s];
 		for(int i = 0; i < s; i++){
@@ -34,7 +35,7 @@ public class Move implements Ai{
 				visited[i][j] = false;
 			}
 		}
-		*/
+		
 		toVisit = new LinkedList<Integer[]>();
 		Integer[] i = {0,0};
 		toVisit.add(i);
@@ -63,10 +64,12 @@ public class Move implements Ai{
 		else if (!toVisit.isEmpty()){
 			Integer[] cp = toVisit.remove(toVisit.size()-1);
 			addDirectionsToVisit(cp);
-			//visited[cp[0]][cp[1]] = true;
+			visited[cp[0]+mOffset][cp[1]+mOffset] = true;
 			
 			nextCommands = findSteps(cp);
-			move = nextCommands.remove(0);
+			if(!nextCommands.isEmpty()){
+				move = nextCommands.remove(0);
+			}
 		}
 	  	moves++;
 	  	return move;
@@ -108,7 +111,7 @@ public class Move implements Ai{
 			int[] vecn = Direction.values()[i].getVector1();
 			Integer[] combined = {cp[0]+vecn[0], cp[1]+vecn[1]};
 			char n = map.getCharAt(combined[0], combined[1]);
-			if(n != '*' && n != '~'){
+			if(n != '*' && n != '~' && !visited[combined[0]+mOffset][combined[1]+mOffset]){
 				toVisit.add(combined);
 			}
 		}
