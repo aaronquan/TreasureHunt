@@ -119,7 +119,7 @@ public class PathFinder implements Ai {
 			GameState[] toEvaluate = currentState.generateNeighbours();
 			for(int i = 0; i < toEvaluate.length; i++){
 				if(toEvaluate[i].checkGoal(goal)){
-					commandBuffer = currentState.getMoves();
+					commandBuffer = toEvaluate[i].getMoves();
 					goalSet = false;
 					System.out.println(commandBuffer);
 					return true;
