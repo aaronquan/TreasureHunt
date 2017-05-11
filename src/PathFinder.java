@@ -16,6 +16,7 @@ public class PathFinder implements Ai {
 	
 	private int lastMove;
 	
+	private boolean goalSet;
 	private int[] goal;
 	private String commandBuffer;
 	
@@ -27,13 +28,27 @@ public class PathFinder implements Ai {
 		map = new TreasureMap();
 		
 		goal = new int[2];
+		goalSet = true;
+		getGoal();
 		commandBuffer = "";
+		
+		
 	}
 	public char makeMove(char[][] view) {
 		char move = 'f';
 		update(view);
-		
-		
+		if(!commandBuffer.isEmpty()){
+			move = commandBuffer.charAt(0);
+			commandBuffer = commandBuffer.substring(1);
+		}
+		else if(goalSet){
+			if(getCommands()){
+				if(!commandBuffer.isEmpty()){
+					move = commandBuffer.charAt(0);
+					commandBuffer = commandBuffer.substring(1);
+				}
+			}
+		}
 		
 		moves++;
 		lastMove = move;
@@ -73,13 +88,16 @@ public class PathFinder implements Ai {
 	//TO DO
 	private void getGoal(){
 		goal[0] = 2; goal[1] = 2;
+		if(position[0] == goal[0] && position[1] == goal[1]){
+			
+		}
 	}
 	
-	//TO DO
 	//use goal and find commands to reach the goal
 	//false if no commands are gotten
 	private boolean getCommands(){
 		int ms = map.getMapSize();
+		int hs = ms/2;
 		boolean[][] visited = new boolean[ms][ms];
 		/*
 		for (int i = 0; i < ms; i++) {
@@ -87,7 +105,7 @@ public class PathFinder implements Ai {
 				visited[i][j] = false;
 			}
 		}*/
-		
+		visited[position[0]+hs][position[1]+hs] = true;
 		
 		Comparator<GameState> gsc = new GameStateComparator();
 		
@@ -100,17 +118,27 @@ public class PathFinder implements Ai {
 			
 			GameState[] toEvaluate = currentState.generateNeighbours();
 			for(int i = 0; i < toEvaluate.length; i++){
-				
+				if(toEvaluate[i].checkGoal(goal)){
+					commandBuffer = currentState.getMoves();
+					goalSet = false;
+					System.out.println(commandBuffer);
+					return true;
+				}
+				int[] pos = toEvaluate[i].getPosition();
+				if(notBlocked(pos[0], pos[1])){
+					if(!visited[pos[0]+hs][pos[1]+hs]){
+						toEvaluate[i].calculateHeuristic(goal);
+						states.add(toEvaluate[i]);
+						visited[pos[0]+hs][pos[1]+hs] = true;
+					}
+				}
 			}
-			
-			if(currentState.checkGoal(goal)){
-				commandBuffer = currentState.getMoves();
-				return true;
-			}
-			
-			
 		}
 		
 		return false;
+	}
+	private boolean notBlocked(int x, int y) {
+		char c = map.getCharAt(x, y);
+		return (c != '~' && c != '*');
 	}
 }

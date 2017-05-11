@@ -76,8 +76,8 @@ public class Agent {
       int ch;
       int i,j;
       
-      //agent.ai = new PathFinder(); //change ai here
-      agent.ai = new Move();
+      agent.ai = new PathFinder(); //change ai here
+      //agent.ai = new Move();
 
       if( args.length < 2 ) {
          System.out.println("Usage: java Agent -p <port>\n");
