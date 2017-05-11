@@ -1,5 +1,5 @@
 
-public class GlobalMap {
+public class TreasureMap {
 	private static final int mapSize = 180;
 	
 	private static final int centre = mapSize/2;
@@ -10,7 +10,7 @@ public class GlobalMap {
 	//[topleft-x, topleft-y, width, height]
 	
 	
-	public GlobalMap(){
+	public TreasureMap(){
 		map = new char[mapSize][mapSize];
 		for(int i = 0; i < mapSize; i++){
 			for(int j = 0; j < mapSize; j++){

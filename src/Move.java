@@ -10,7 +10,7 @@ public class Move implements Ai{
 	private int moves;
 	private Direction currentDirection; //starting from north
 	
-	private GlobalMap map;
+	private TreasureMap map;
 	
 	private int lastMove;
 	
@@ -25,7 +25,7 @@ public class Move implements Ai{
 		position[0] = 0; position[1] = 0;
 		moves = 0;
 		currentDirection = Direction.NORTH;
-		map = new GlobalMap();
+		map = new TreasureMap();
 		
 		
 		int s = map.getMapSize();
