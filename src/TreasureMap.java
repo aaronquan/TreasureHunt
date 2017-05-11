@@ -75,7 +75,7 @@ public class TreasureMap {
 					treasure[0] = pos[0]+i-viewOffset; treasure[1] = pos[1]-viewOffset;
 				}
 			}
-			System.out.println("north");
+			//System.out.println("north");
 			break;
 		case EAST:
 			if(cx+viewOffset >= dimensions[0]+dimensions[2]){
@@ -88,7 +88,7 @@ public class TreasureMap {
 					treasure[0] = pos[0]+viewOffset; treasure[1] = pos[1]+i-viewOffset;
 				}
 			}
-			System.out.println("east");
+			//System.out.println("east");
 			break;
 		case SOUTH:
 			if(cy+viewOffset >= dimensions[1]+dimensions[3]){
@@ -101,7 +101,7 @@ public class TreasureMap {
 					treasure[0] = pos[0]+i-viewOffset; treasure[1] = pos[1]+viewOffset;
 				}
 			}
-			System.out.println("south");
+			//System.out.println("south");
 			break;
 		case WEST:
 			if(cx-viewOffset < dimensions[0]){
@@ -115,7 +115,7 @@ public class TreasureMap {
 					treasure[0] = pos[0]-viewOffset; treasure[1] = pos[1]+i-viewOffset;
 				}
 			}
-			System.out.println("west");
+			//System.out.println("west");
 			break;
 		}
 	}

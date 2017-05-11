@@ -97,12 +97,12 @@ public class Move implements Ai{
 	
 	private void updatePositionFromLastMove(char[][] view){
 		if(lastMove == 'l'){
-			map.changePlayerDirection(position, currentDirection);
 			currentDirection = currentDirection.turnLeft();
+			map.changePlayerDirection(position, currentDirection);
 		}
 		if(lastMove == 'r'){
-			map.changePlayerDirection(position, currentDirection);
 			currentDirection = currentDirection.turnRight();
+			map.changePlayerDirection(position, currentDirection);
 		}
 		if(lastMove == 'f'){
 			int[] v = currentDirection.getVector1();

@@ -1,5 +1,6 @@
-import java.util.*;
+//an extension of the move ai. Finds path to a goal. Only moves
 
+import java.util.*;
 
 public class PathFinder implements Ai {
 	
@@ -16,7 +17,7 @@ public class PathFinder implements Ai {
 	private int lastMove;
 	
 	private int[] goal;
-	private LinkedList<Character> commandBuffer;
+	private String commandBuffer;
 	
 	public PathFinder(){
 		position = new int[2];
@@ -26,7 +27,7 @@ public class PathFinder implements Ai {
 		map = new TreasureMap();
 		
 		goal = new int[2];
-		commandBuffer = new LinkedList<Character>();
+		commandBuffer = "";
 	}
 	public char makeMove(char[][] view) {
 		char move = 'f';
@@ -48,12 +49,12 @@ public class PathFinder implements Ai {
 	}
 	private void updateUsingLastMove(char[][] view){
 		if(lastMove == 'l'){
-			map.changePlayerDirection(position, currentDirection);
 			currentDirection = currentDirection.turnLeft();
+			map.changePlayerDirection(position, currentDirection);
 		}
 		if(lastMove == 'r'){
-			map.changePlayerDirection(position, currentDirection);
 			currentDirection = currentDirection.turnRight();
+			map.changePlayerDirection(position, currentDirection);
 		}
 		if(lastMove == 'f'){
 			int[] v = currentDirection.getVector1();
@@ -78,6 +79,38 @@ public class PathFinder implements Ai {
 	//use goal and find commands to reach the goal
 	//false if no commands are gotten
 	private boolean getCommands(){
+		int ms = map.getMapSize();
+		boolean[][] visited = new boolean[ms][ms];
+		/*
+		for (int i = 0; i < ms; i++) {
+			for(int j = 0; j < ms; j++){
+				visited[i][j] = false;
+			}
+		}*/
+		
+		
+		Comparator<GameState> gsc = new GameStateComparator();
+		
+		PriorityQueue<GameState> states = new PriorityQueue<GameState>(gsc);
+		GameState init = new GameState(position[0], position[1], currentDirection);
+		states.add(init);
+		
+		while(!states.isEmpty()){
+			GameState currentState = states.poll();
+			
+			GameState[] toEvaluate = currentState.generateNeighbours();
+			for(int i = 0; i < toEvaluate.length; i++){
+				
+			}
+			
+			if(currentState.checkGoal(goal)){
+				commandBuffer = currentState.getMoves();
+				return true;
+			}
+			
+			
+		}
+		
 		return false;
 	}
 }

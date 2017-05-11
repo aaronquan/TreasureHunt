@@ -18,7 +18,7 @@ public class Agent {
 
       int ch=0;
 
-      System.out.print("Enter Action(s): ");
+      //System.out.print("Enter Action(s): ");
 
       //try {
          while ( ch != -1 ) {
@@ -76,7 +76,8 @@ public class Agent {
       int ch;
       int i,j;
       
-      agent.ai = new Move(); //change ai here
+      //agent.ai = new PathFinder(); //change ai here
+      agent.ai = new Move();
 
       if( args.length < 2 ) {
          System.out.println("Usage: java Agent -p <port>\n");
@@ -108,7 +109,7 @@ public class Agent {
                   }
                }
             }
-            agent.print_view( view ); // COMMENT THIS OUT BEFORE SUBMISSION
+            //agent.print_view( view ); // COMMENT THIS OUT BEFORE SUBMISSION
             action = agent.get_action( view );
             out.write( action );
          }
