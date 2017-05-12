@@ -22,6 +22,9 @@ public class PathFinder implements Ai {
 	private int[] goal;
 	private String commandBuffer;
 	
+	private boolean[][] discovered;
+	//private LinkedList<GameState> dfsStates;
+	
 	public PathFinder(){
 		position = new int[2];
 		position[0] = 0; position[1] = 0;
@@ -34,6 +37,10 @@ public class PathFinder implements Ai {
 		commandBuffer = "";
 		
 		hasTreasure = false;
+		
+		int ms = map.getMapSize();
+		discovered = new boolean[ms][ms];
+		//dfsStates = new LinkedList<GameState>();
 	}
 	public char makeMove(char[][] view) {
 		char move = 'f';
@@ -66,6 +73,8 @@ public class PathFinder implements Ai {
 	private void update(char view[][]){
 		if(moves == 0){
 			map.addStartingView(view);
+			int hs = map.getMapSize()/2;
+			discovered[hs][hs] = true;
 		}else{
 			updateUsingLastMove(view);
 		}
@@ -114,13 +123,15 @@ public class PathFinder implements Ai {
 			
 			//discover more of the map
 			
-			//move in a valid direction with the most unknowns
+			//move in a valid direction using dfs
 			GameState current = new GameState(position[0], position[1], currentDirection);
 			GameState[] neighbours = current.generateNeighbours();
 			for(int i = 0; i < neighbours.length; i++){
+				int hs = map.getMapSize()/2;
 				int[] newPos = neighbours[i].getPosition();
-				if(!map.isBlockedAt(newPos[0], newPos[1])){
-					
+				if(!map.isBlockedAt(newPos[0], newPos[1]) && !discovered[newPos[0]+hs][newPos[1]+hs]){
+					goal[0] = newPos[0]; goal[1] = newPos[1];
+					discovered[newPos[0]+hs][newPos[1]+hs] = true;
 				}
 			}
 		}
