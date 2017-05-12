@@ -9,6 +9,7 @@ public class TreasureMap {
 	private static final int centre = mapSize/2;
 	
 	private static final int viewOffset = 2;
+	private static final int viewWidth = 5;
 	//centre of the map is (0, 0)
 	
 	private char map[][]; //takes [y][x] coordinates
@@ -152,6 +153,33 @@ public class TreasureMap {
 		System.out.println("+");
 	}
 	
+	public int getNumUnknowns(int[] pos, Direction d){
+		int n = 0;
+		switch(d){
+		case NORTH:
+			for(int i = -viewOffset; i <= viewOffset; i++){
+				if(map[pos[1]-viewOffset][pos[0]+i] == 'u') n++;
+			}
+			break;
+		case EAST:
+			for(int i = -viewOffset; i <= viewOffset; i++){
+				if(map[pos[1]+i][pos[0]+viewOffset] == 'u') n++;
+			}
+			break;
+		case SOUTH:
+			for(int i = -viewOffset; i <= viewOffset; i++){
+				if(map[pos[1]+viewOffset][pos[0]+i] == 'u') n++;
+			}
+			break;
+		case WEST:
+			for(int i = -viewOffset; i <= viewOffset; i++){
+				if(map[pos[1]+i][pos[0]-viewOffset] == 'u') n++;
+			}
+			break;
+		}
+		return n;
+	}
+	
 	public void movePlayer(int[] pos, Direction d){
 		int[] v = d.getVector1();
 		char c = d.getDirectionalChar();
@@ -171,15 +199,36 @@ public class TreasureMap {
 		return r;
 	}
 	
-	// check t[0] for true or false: 0 - false, 1 - true, 
-	// t[1] and t[2] specify coordinates
-	public int[] isTreasureFound(){
-		int[] t = new int[3];
+	//may not be valid if treasureFound is false
+	//unhandled for multiple treasures
+	public int[] getTreasurePosition(){
+		int[] t = new int[2];
 		if(treasureFound){
-			t[0] = 1; t[1] = treasure[0]; t[2] = treasure[1];
+			t[0] = treasure[0]; t[1] = treasure[1];
 		}else{
-			t[0] = 0;
+			t[0] = 0; t[1] = 0;
 		}
 		return t;
+	}
+	/*
+	public boolean hasTreasure(int x, int y){
+		return treasure[0] == x && treasure[1] == y;
+	}*/
+	public boolean hasTreasure(int x, int y){
+		return map[y+centre][x+centre] == '$';
+	}
+	
+	public boolean isTreasureFound(){
+		return treasureFound;
+	}
+	
+	public boolean isBlockedAt(int x, int y){
+		char c = map[y+centre][x+centre];
+		return c == '*' || c == 'T';
+	}
+	
+	public boolean isBlockedAt(int x, int y, boolean hasBoat){
+		char c = map[y+centre][x+centre];
+		return c == '*' || c == '.' || c == 'T' || (hasBoat && c == '~');
 	}
 }
