@@ -24,6 +24,7 @@ public class PathFinder implements Ai {
 	
 	private boolean[][] discovered;
 	//private LinkedList<GameState> dfsStates;
+	private LinkedList<Integer[]> backtracker;
 	
 	public PathFinder(){
 		position = new int[2];
@@ -41,6 +42,7 @@ public class PathFinder implements Ai {
 		int ms = map.getMapSize();
 		discovered = new boolean[ms][ms];
 		//dfsStates = new LinkedList<GameState>();
+		backtracker = new LinkedList<Integer[]>();
 	}
 	public char makeMove(char[][] view) {
 		char move = 'f';
@@ -101,6 +103,9 @@ public class PathFinder implements Ai {
 			
 			//test for wall in front
 			if(!map.isBlockedAt(position[0]+v[0], position[1]+v[1])){
+				Integer[] p = {position[0], position[1]};
+				backtracker.add(p);
+				discovered[position[0]+v[0]][position[1]+v[1]] = true;
 				map.movePlayer(position, currentDirection);
 				addToPosition(v);
 				map.updateMap(view[0], currentDirection, position);	
@@ -126,13 +131,22 @@ public class PathFinder implements Ai {
 			//move in a valid direction using dfs
 			GameState current = new GameState(position[0], position[1], currentDirection);
 			GameState[] neighbours = current.generateNeighbours();
+			boolean found = false;
+			
+			//can optimise by choosing best neighbour (based of information gained)
+			//this loop only chooses first in the array i.e forward -> left -> right -> back
 			for(int i = 0; i < neighbours.length; i++){
 				int hs = map.getMapSize()/2;
 				int[] newPos = neighbours[i].getPosition();
 				if(!map.isBlockedAt(newPos[0], newPos[1]) && !discovered[newPos[0]+hs][newPos[1]+hs]){
 					goal[0] = newPos[0]; goal[1] = newPos[1];
-					discovered[newPos[0]+hs][newPos[1]+hs] = true;
+					found = true;
+					break;
 				}
+			}
+			if(!found && !backtracker.isEmpty()){
+				Integer[] prev = backtracker.removeLast();
+				goal[0] = prev[0]; goal[1] = prev[1];
 			}
 		}
 	}
