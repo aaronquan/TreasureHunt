@@ -31,9 +31,16 @@ public class GameState {
 		heuristic = Math.abs(position[0]-goal[0])+Math.abs(position[1]-goal[1]);
 	}
 	
+	public void setHeuristic(int h){
+		heuristic = h;
+	}
 	
 	public int getFValue(){
 		return heuristic+movesSoFar.length();
+	}
+	
+	public int getHValue(){
+		return heuristic;
 	}
 	
 	public boolean checkGoal(int[] goal){

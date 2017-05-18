@@ -4,7 +4,7 @@
 
 import java.util.*;
 public class TreasureMap {
-	private static final int mapSize = 180;
+	private static final int mapSize = 160;
 	
 	private static final int centre = mapSize/2;
 	
@@ -184,22 +184,22 @@ public class TreasureMap {
 		switch(d){
 		case NORTH:
 			for(int i = -viewOffset; i <= viewOffset; i++){
-				if(map[pos[1]-viewOffset][pos[0]+i] == 'u') n++;
+				if(map[pos[1]-viewOffset+centre][pos[0]+i+centre] == 'u') n++;
 			}
 			break;
 		case EAST:
 			for(int i = -viewOffset; i <= viewOffset; i++){
-				if(map[pos[1]+i][pos[0]+viewOffset] == 'u') n++;
+				if(map[pos[1]+i+centre][pos[0]+viewOffset+centre] == 'u') n++;
 			}
 			break;
 		case SOUTH:
 			for(int i = -viewOffset; i <= viewOffset; i++){
-				if(map[pos[1]+viewOffset][pos[0]+i] == 'u') n++;
+				if(map[pos[1]+viewOffset+centre][pos[0]+i+centre] == 'u') n++;
 			}
 			break;
 		case WEST:
 			for(int i = -viewOffset; i <= viewOffset; i++){
-				if(map[pos[1]+i][pos[0]-viewOffset] == 'u') n++;
+				if(map[pos[1]+i+centre][pos[0]-viewOffset+centre] == 'u') n++;
 			}
 			break;
 		}
@@ -223,6 +223,10 @@ public class TreasureMap {
 	private int[] toRelativeCoordinates(int[] tmc){
 		int[] r = {tmc[0]-centre, tmc[1]-centre};
 		return r;
+	}
+	
+	public boolean isCharAtPosition(int[] pos, char c){
+		return map[pos[1]+centre][pos[0]+centre] == c;
 	}
 	
 	public boolean hasTreasure(int x, int y){

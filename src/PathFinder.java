@@ -158,7 +158,7 @@ public class PathFinder implements Ai {
 		int hs = ms/2;
 		boolean[][] visited = new boolean[ms][ms]; //should all be false
 		
-		Comparator<GameState> gsc = new GameStateComparator();
+		Comparator<GameState> gsc = new GameStateComparator(true);
 		
 		PriorityQueue<GameState> states = new PriorityQueue<GameState>(gsc);
 		GameState init = new GameState(position[0], position[1], currentDirection);
