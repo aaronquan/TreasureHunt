@@ -224,7 +224,7 @@ public class TreasureMap {
 	
 	public boolean isBlockedAt(int x, int y){
 		char c = map[y+centre][x+centre];
-		return c == '*' || c == 'T' || c == '~';
+		return c == '*' || c == 'T' || c == '~' || c == 'u';
 	}
 	
 	public boolean isBlockedAt(int x, int y, boolean hasBoat){

@@ -48,17 +48,15 @@ public class PathFinder implements Ai {
 		char move = 'f';
 		update(view);
 		
-		if(commandBuffer.isEmpty()){
-			getGoal();
-		}
 		
 		if(!commandBuffer.isEmpty()){
 			move = commandBuffer.charAt(0);
 			commandBuffer = commandBuffer.substring(1);
 		}
 		else{
+			getGoal(true);
 			while(!getCommands()){
-				getGoal();
+				getGoal(false);
 			}
 			//should never be empty
 			if(!commandBuffer.isEmpty()){
@@ -105,7 +103,8 @@ public class PathFinder implements Ai {
 			if(!map.isBlockedAt(position[0]+v[0], position[1]+v[1])){
 				Integer[] p = {position[0], position[1]};
 				backtracker.add(p);
-				discovered[position[0]+v[0]][position[1]+v[1]] = true;
+				int hs = map.getMapSize()/2;
+				discovered[position[0]+v[0]+hs][position[1]+v[1]+hs] = true;
 				map.movePlayer(position, currentDirection);
 				addToPosition(v);
 				map.updateMap(view[0], currentDirection, position);	
@@ -116,12 +115,12 @@ public class PathFinder implements Ai {
 		position[0] += v[0]; position[1] += v[1];
 	}
 	
-	private void getGoal(){
+	private void getGoal(boolean treasurePath){
 		if(hasTreasure){
 			goal[0] = 0; goal[1] = 0;
 		}
-		else if(map.isTreasureFound()){
-			//System.out.println("found");
+		else if(map.isTreasureFound() && treasurePath){
+			System.out.println("found");
 			goal = map.getTreasurePosition();
 		}else{
 			goal[0] = 0; goal[1] = 0; //default
@@ -177,6 +176,7 @@ public class PathFinder implements Ai {
 					return true;
 				}
 				int[] pos = toEvaluate[i].getPosition();
+				//System.out.println(pos[0]);
 				if(!map.isBlockedAt(pos[0], pos[1])){
 					
 					if(!visited[pos[0]+hs][pos[1]+hs]){
