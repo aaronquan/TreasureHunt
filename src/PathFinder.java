@@ -96,8 +96,7 @@ public class PathFinder implements Ai {
 				
 				hasTreasure = true;
 				System.out.println("has the treasure: "+map.getCharAt(position[0]+v[0], position[1]+v[1]));
-			};
-			
+			};			
 			
 			//test for wall in front
 			if(!map.isBlockedAt(position[0]+v[0], position[1]+v[1])){
@@ -114,12 +113,14 @@ public class PathFinder implements Ai {
 	}
 	
 	private void getGoal(boolean treasurePath){
+		LinkedList<Integer[]> tre = map.getTreasures();
 		if(hasTreasure){
 			goal[0] = 0; goal[1] = 0;
 		}
-		else if(map.isTreasureFound() && treasurePath){
+		else if(!tre.isEmpty() && treasurePath){
+			Integer[] first = tre.getFirst();
 			System.out.println("found");
-			goal = map.getTreasurePosition();
+			goal[0] = first[0]; goal[1] = first[1];
 		}else{
 			goal[0] = 0; goal[1] = 0; //default
 			

@@ -16,8 +16,15 @@ public class TreasureMap {
 	private int[] dimensions; //specifies the active parts of the map rectangle
 	//[topleft-x, topleft-y, width, height]
 	
-	private int[] treasure; //position of the treasure
-	private boolean treasureFound;
+	private LinkedList<Integer[]> treasures; //position of the treasures
+	
+	private LinkedList<Integer[]> keys; //position of the keys
+	
+	private LinkedList<Integer[]> doors; //position of the doors
+	
+	private LinkedList<Integer[]> dynamite; //position of the dynamite
+	
+	private LinkedList<Integer[]> axes; //position of the axes
 	
 	private LinkedList<Integer[]> trees; //TO DO
 	
@@ -35,9 +42,10 @@ public class TreasureMap {
 		dimensions[2] = 0;
 		dimensions[3] = 0;
 		
-		treasure = new int[2];
-		treasureFound = false;
 		
+		treasures = new LinkedList<Integer[]>();
+		keys = new LinkedList<Integer[]>();
+		doors = new LinkedList<Integer[]>();
 		trees = new LinkedList<Integer[]>();
 	}
 	
@@ -50,9 +58,12 @@ public class TreasureMap {
 				
 				map[j+dimensions[1]][i+dimensions[0]] = view[j][i];
 				if(i == 2 && j == 2) map[j+dimensions[1]][i+dimensions[0]] = '^';
+				int x = i - viewOffset; int y = j - viewOffset;
+				Integer[] p = {x,y};
 				if(view[j][i] == '$'){
-					treasureFound = true;
-					treasure[0] = i - viewOffset; treasure[1] = j - viewOffset;
+					treasures.add(p);
+				}else if(view[j][i] == 'k'){
+					keys.add(p);
 				}
 			}
 		}
@@ -62,7 +73,6 @@ public class TreasureMap {
 	public void updateMap(char view[], Direction d, int[] pos){
 		int cx = centre+pos[0];
 		int cy = centre+pos[1];
-		//int offset = 2;
 		switch(d){
 		case NORTH:
 			if(cy-viewOffset < dimensions[1]){
@@ -70,10 +80,14 @@ public class TreasureMap {
 				dimensions[3] += 1;
 			}
 			for(int i = 0; i < view.length; i++){
+				if (map[cy-viewOffset][cx+i-viewOffset] != 'u') continue;
 				map[cy-viewOffset][cx+i-viewOffset] = view[i];
+				int x = pos[0]+i-viewOffset; int y = pos[1]-viewOffset;
+				Integer[] p = {x,y};
 				if(view[i] == '$'){
-					treasureFound = true;
-					treasure[0] = pos[0]+i-viewOffset; treasure[1] = pos[1]-viewOffset;
+					treasures.add(p);
+				}else if(view[i] == 'k'){
+					keys.add(p);
 				}
 			}
 			//System.out.println("north");
@@ -83,10 +97,14 @@ public class TreasureMap {
 				dimensions[2] += 1;
 			}
 			for(int i = 0; i < view.length; i++){
+				if (map[cy-viewOffset+i][cx+viewOffset] != 'u') continue;
 				map[cy-viewOffset+i][cx+viewOffset] = view[i];
+				int x = pos[0]+viewOffset; int y = pos[1]+i-viewOffset;
+				Integer[] p = {x,y};
 				if(view[i] == '$'){
-					treasureFound = true;
-					treasure[0] = pos[0]+viewOffset; treasure[1] = pos[1]+i-viewOffset;
+					treasures.add(p);
+				}else if(view[i] == 'k'){
+					keys.add(p);
 				}
 			}
 			//System.out.println("east");
@@ -96,10 +114,14 @@ public class TreasureMap {
 				dimensions[3] += 1;
 			}
 			for(int i = 0; i < view.length; i++){
+				if (map[cy+viewOffset][cx+i-viewOffset] != 'u') continue;
 				map[cy+viewOffset][cx+i-viewOffset] = view[view.length-1-i];
+				int x = pos[0]+i-viewOffset; int y = pos[1]+viewOffset;
+				Integer[] p = {x,y};
 				if(view[i] == '$'){
-					treasureFound = true;
-					treasure[0] = pos[0]+i-viewOffset; treasure[1] = pos[1]+viewOffset;
+					treasures.add(p);
+				}else if(view[i] == 'k'){
+					keys.add(p);
 				}
 			}
 			//System.out.println("south");
@@ -110,10 +132,14 @@ public class TreasureMap {
 				dimensions[2] += 1;
 			}
 			for(int i = 0; i < view.length; i++){
+				if (map[cy+i-viewOffset][cx-viewOffset] != 'u') continue;
 				map[cy+i-viewOffset][cx-viewOffset] = view[view.length-1-i];
+				int x = pos[0]-viewOffset; int y = pos[1]+i-viewOffset;
+				Integer[] p = {x,y};
 				if(view[i] == '$'){
-					treasureFound = true;
-					treasure[0] = pos[0]-viewOffset; treasure[1] = pos[1]+i-viewOffset;
+					treasures.add(p);
+				}else if(view[i] == 'k'){
+					keys.add(p);
 				}
 			}
 			//System.out.println("west");
@@ -199,32 +225,21 @@ public class TreasureMap {
 		return r;
 	}
 	
-	//may not be valid if treasureFound is false
-	//unhandled for multiple treasures
-	public int[] getTreasurePosition(){
-		int[] t = new int[2];
-		if(treasureFound){
-			t[0] = treasure[0]; t[1] = treasure[1];
-		}else{
-			t[0] = 0; t[1] = 0;
-		}
-		return t;
-	}
-	/*
 	public boolean hasTreasure(int x, int y){
-		return treasure[0] == x && treasure[1] == y;
-	}*/
-	public boolean hasTreasure(int x, int y){
-		return map[y+centre][x+centre] == '$';
+		return map[y+centre][x+centre]=='$';
 	}
 	
-	public boolean isTreasureFound(){
-		return treasureFound;
+	public LinkedList<Integer[]> getTreasures(){
+		return treasures;
+	}
+	
+	public LinkedList<Integer[]> getKeys(){
+		return keys;
 	}
 	
 	public boolean isBlockedAt(int x, int y){
 		char c = map[y+centre][x+centre];
-		return c == '*' || c == 'T' || c == '~' || c == 'u';
+		return c == '*' || c == 'T' || c == '~' || c == '-' || c == 'u';
 	}
 	
 	public boolean isBlockedAt(int x, int y, boolean hasBoat){
