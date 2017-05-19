@@ -80,46 +80,7 @@ public class GameState {
 		
 		return gameStates;	
 	}
-	public GameState[] generateNeighboursConditional(TreasureMap map){
-		GameState[] gameStates = new GameState[4];
-		
-		//forward
-		int[] vf = direction.getVector1();
-		if(map.isCharAtPosition(position[0]+vf[0], position[1]+vf[1], '-')){
-			gameStates[0] = new GameState(position[0]+vf[0], position[1]+vf[1], direction, movesSoFar+"uf");
-		}else{
-			gameStates[0] = new GameState(position[0]+vf[0], position[1]+vf[1], direction, movesSoFar+"f");
-		}
-		
-		//left
-		Direction relativeLeft = direction.copy().turnLeft();
-		int[] vl = relativeLeft.getVector1();
-		if(map.isCharAtPosition(position[0]+vl[0], position[1]+vl[1], '-')){
-			gameStates[1] = new GameState(position[0]+vl[0], position[1]+vl[1], relativeLeft, movesSoFar+"luf");
-		}else{
-			gameStates[1] = new GameState(position[0]+vl[0], position[1]+vl[1], relativeLeft, movesSoFar+"lf");
-		}
-		
-		//right
-		Direction relativeRight = direction.copy().turnRight();
-		int[] vr = relativeRight.getVector1();
-		if(map.isCharAtPosition(position[0]+vr[0], position[1]+vr[1], '-'))
-			gameStates[2] = new GameState(position[0]+vr[0], position[1]+vr[1], relativeRight, movesSoFar+"ruf");
-		else{
-			gameStates[2] = new GameState(position[0]+vr[0], position[1]+vr[1], relativeRight, movesSoFar+"rf");
-		}
-		
-		//backwards
-		Direction relativeBack = direction.copy().turnLeft().turnLeft();
-		int[] vb = relativeBack.getVector1();
-		if(map.isCharAtPosition(position[0]+vb[0], position[1]+vb[1], '-')){
-			gameStates[3] = new GameState(position[0]+vb[0], position[1]+vb[1], relativeBack, movesSoFar+"lluf");
-		}else{
-			gameStates[3] = new GameState(position[0]+vb[0], position[1]+vb[1], relativeBack, movesSoFar+"llf");
-		}
-		
-		return gameStates;	
-	}
+	
 	public GameState openDoor(){
 		return new GameState(position[0], position[1], direction, movesSoFar+"u");
 	}
