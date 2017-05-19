@@ -13,6 +13,7 @@ public class MultiGoalAction implements Ai{
 	
 	private boolean hasTreasure;
 	private boolean hasKey;
+	private boolean hasAxe;
 	
 	//searching
 	private boolean[][] discovered;
@@ -29,6 +30,7 @@ public class MultiGoalAction implements Ai{
 		commandBuffer = "";
 		hasTreasure = false;
 		hasKey = false;
+		hasAxe = false;
 		
 		int ms = map.getMapSize();
 		discovered = new boolean[ms][ms];
@@ -46,10 +48,12 @@ public class MultiGoalAction implements Ai{
 			discovered[position[0]+hs][position[1]+hs] = true;
 			updateUsingLastMove(view);
 		}
-		map.printMap();
+		//map.printMap();
 	}
 	
 	private void updateUsingLastMove(char[][] view){
+		int[] v = currentDirection.getVector1();
+		int[] cv = {position[0]+v[0], position[1]+v[1]};
 		if(lastMove == 'l'){
 			currentDirection = currentDirection.turnLeft();
 			map.changePlayerDirection(position, currentDirection);
@@ -59,15 +63,16 @@ public class MultiGoalAction implements Ai{
 			map.changePlayerDirection(position, currentDirection);
 		}
 		else if(lastMove == 'f'){
-			int[] v = currentDirection.getVector1();
 			//test for treasure
-			if(map.isCharAtPosition(position[0]+v[0], position[1]+v[1], '$')){
+			if(map.isCharAtPosition(cv[0], cv[1], '$')){
 				hasTreasure = true;
-				System.out.println("has the treasure: "+map.getCharAt(position[0]+v[0], position[1]+v[1]));
-			}else if(map.isCharAtPosition(position[0]+v[0], position[1]+v[1], 'k')){
+				System.out.println("has the treasure: "+map.getCharAt(cv[0], cv[1]));
+			}else if(map.isCharAtPosition(cv[0], cv[1], 'k')){
 				hasKey = true;
+			}else if(map.isCharAtPosition(cv[0], cv[1], 'a')){
+				hasAxe = true;
 			}
-			if(!map.isBlockedAt(position[0]+v[0], position[1]+v[1])){
+			if(!map.isBlockedAt(cv[0], cv[1])){
 				if(!backing){
 					Integer bt[] = {position[0], position[1]};
 					backtracker.add(bt);
@@ -75,6 +80,14 @@ public class MultiGoalAction implements Ai{
 				map.movePlayer(position, currentDirection);
 				position[0]+=v[0]; position[1]+=v[1];
 				map.updateMap(view[0], currentDirection, position);	
+			}
+		}else if(lastMove == 'u'){
+			if(map.isCharAtPosition(cv[0], cv[1], '-')){
+				map.setCharAt(cv[0], cv[1], ' ');
+			}
+		}else if(lastMove == 'c'){
+			if(map.isCharAtPosition(cv[0], cv[1], 'T')){
+				map.setCharAt(cv[0], cv[1], ' ');
 			}
 		}
 	}
@@ -104,9 +117,19 @@ public class MultiGoalAction implements Ai{
 			goal[0] = 0; goal[1] = 0;
 			if(getCommands(goal)) return true;
 		}
-		for(Integer[] c: map.getTreasures()){
-			goal[0] = c[0]; goal[1] = c[1];
+		for(Integer[] m: map.getTreasures()){
+			goal[0] = m[0]; goal[1] = m[1];
 			if(getCommands(goal)) return true;
+		}
+		if(!hasKey && !map.getKeys().isEmpty()){
+			for(Integer[] k: map.getKeys()){
+				goal[0] = k[0]; goal[1] = k[1];
+			}
+		}
+		if(!hasAxe && !map.getAxes().isEmpty()){
+			for(Integer[] a: map.getAxes()){
+				goal[0] = a[0]; goal[1] = a[1];
+			}
 		}
 		
 		//exploring

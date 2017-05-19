@@ -42,10 +42,11 @@ public class TreasureMap {
 		dimensions[2] = 0;
 		dimensions[3] = 0;
 		
-		
 		treasures = new LinkedList<Integer[]>();
 		keys = new LinkedList<Integer[]>();
 		doors = new LinkedList<Integer[]>();
+		dynamite = new LinkedList<Integer[]>();
+		axes = new LinkedList<Integer[]>();
 		trees = new LinkedList<Integer[]>();
 	}
 	
@@ -142,6 +143,9 @@ public class TreasureMap {
 			trees.add(p); break;
 		}
 	}
+	public void setCharAt(int x, int y, char c){
+		map[y+centre][x+centre] = c;
+	}
 	public char getCharAt(int x, int y){
 		return map[y+centre][x+centre];
 	}
@@ -236,6 +240,36 @@ public class TreasureMap {
 	public LinkedList<Integer[]> getKeys(){
 		return keys;
 	}
+	
+	public LinkedList<Integer[]> getDoors(){
+		return doors;
+	}
+	public LinkedList<Integer[]> getDynamite(){
+		return dynamite;
+	}
+	public LinkedList<Integer[]> getAxes(){
+		return axes;
+	}
+	public LinkedList<Integer[]> getTrees(){
+		return trees;
+	}
+	
+	public void removeDoors(int[] p){
+		for(int i = 0; i < doors.size(); i++){
+			if(doors.get(i)[0] == p[0] && doors.get(i)[1] == p[1]) doors.remove(i);
+		}
+	}
+	public void removeDynamite(int[] p){
+		for(int i = 0; i < dynamite.size(); i++){
+			if(dynamite.get(i)[0] == p[0] && dynamite.get(i)[1] == p[1]) dynamite.remove(i);
+		}
+	}
+	public void removeTrees(int[] p){
+		for(int i = 0; i < trees.size(); i++){
+			if(trees.get(i)[0] == p[0] && trees.get(i)[1] == p[1]) trees.remove(i);
+		}
+	}
+	
 	
 	public boolean isBlockedAt(int x, int y){
 		char c = map[y+centre][x+centre];

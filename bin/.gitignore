@@ -2,3 +2,6 @@
 /GameStateComparator.class
 /PathFinder.class
 /TreasureMap.class
+/MultiGoal.class
+/MultiGoalAction.class
+/TreasureChecklist.class
