@@ -14,7 +14,11 @@ public class MultiGoal implements Ai{
 	private boolean hasTreasure;
 	private boolean hasKey;
 	
+	//searching
 	private boolean[][] discovered;
+	private LinkedList<Integer[]> backtracker;
+	private boolean backing;
+	
 	
 	public MultiGoal(){
 		position = new int[2];
@@ -28,6 +32,8 @@ public class MultiGoal implements Ai{
 		
 		int ms = map.getMapSize();
 		discovered = new boolean[ms][ms];
+		backtracker = new LinkedList<Integer[]>();
+		backing = false;
 	}
 	
 	private void update(char view[][]){
@@ -36,6 +42,8 @@ public class MultiGoal implements Ai{
 			int hs = map.getMapSize()/2;
 			discovered[hs][hs] = true;
 		}else{
+			int hs = map.getMapSize()/2;
+			discovered[position[0]+hs][position[1]+hs] = true;
 			updateUsingLastMove(view);
 		}
 		map.printMap();
@@ -53,12 +61,17 @@ public class MultiGoal implements Ai{
 		else if(lastMove == 'f'){
 			int[] v = currentDirection.getVector1();
 			//test for treasure
-			if(map.isCharAtPosition(position, '$')){
+			if(map.isCharAtPosition(position[0]+v[0], position[1]+v[1], '$')){
 				hasTreasure = true;
 				System.out.println("has the treasure: "+map.getCharAt(position[0]+v[0], position[1]+v[1]));
-			};			
-			//test for wall in front
-			if(!map.isBlockedAt(position[0]+v[0], position[1]+v[1])){
+			}else if(map.isCharAtPosition(position[0]+v[0], position[1]+v[1], 'k')){
+				hasKey = true;
+			}
+			else if(!map.isBlockedAt(position[0]+v[0], position[1]+v[1])){
+				if(!backing){
+					Integer bt[] = {position[0], position[1]};
+					backtracker.add(bt);
+				}
 				map.movePlayer(position, currentDirection);
 				position[0]+=v[0]; position[1]+=v[1];
 				map.updateMap(view[0], currentDirection, position);	
@@ -85,6 +98,7 @@ public class MultiGoal implements Ai{
 		return move;
 	}
 	private boolean evaluateMove(){
+		backing = false;
 		int[] goal = {0,0};
 		if(hasTreasure){
 			goal[0] = 0; goal[1] = 0;
@@ -104,20 +118,21 @@ public class MultiGoal implements Ai{
 		for(GameState gs: neighbours){
 			int[] pos = gs.getPosition();
 			if(!map.isBlockedAt(pos[0], pos[1]) && !discovered[pos[0]+hs][pos[1]+hs]){
-				System.out.println(pos[0]);
 				int h = map.getNumUnknowns(pos, gs.getDirection());
 				gs.setHeuristic(h);
 				states.add(gs);
 			}
 		}
-		for(GameState gs: states){	
-			System.out.println("1234");
-			if(getCommands(goal)){
-				System.out.println("123");
-				int[] pos = gs.getPosition();
-				discovered[pos[0]+hs][pos[1]+hs] = true;
-				return true;
-			}
+		if(!states.isEmpty()){
+			GameState next = states.poll();
+			commandBuffer = next.getMoves();
+			int[] pos = next.getPosition();
+			discovered[pos[0]+hs][pos[1]+hs] = true;
+			return true;
+		}else if(!backtracker.isEmpty()){
+			Integer[] back = backtracker.removeLast();
+			goal[0] = back[0]; goal[1] = back[1];
+			if (backing = getCommands(goal)) return true;
 		}
 		return false;
 	}
@@ -139,7 +154,7 @@ public class MultiGoal implements Ai{
 		
 		while(!states.isEmpty()){
 			GameState currentState = states.poll();
-			
+
 			GameState[] toEvaluate = currentState.generateNeighbours();
 			for(int i = 0; i < toEvaluate.length; i++){
 				if(toEvaluate[i].checkGoal(goal)){

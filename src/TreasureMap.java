@@ -55,16 +55,11 @@ public class TreasureMap {
 		assert(view[0].length > 0);
 		for(int j = 0; j < view.length; j++){
 			for(int i = 0; i < view[0].length; i++){
-				
 				map[j+dimensions[1]][i+dimensions[0]] = view[j][i];
 				if(i == 2 && j == 2) map[j+dimensions[1]][i+dimensions[0]] = '^';
 				int x = i - viewOffset; int y = j - viewOffset;
 				Integer[] p = {x,y};
-				if(view[j][i] == '$'){
-					treasures.add(p);
-				}else if(view[j][i] == 'k'){
-					keys.add(p);
-				}
+				addToList(p, view[j][i]);
 			}
 		}
 		dimensions[2] = view.length;
@@ -84,11 +79,8 @@ public class TreasureMap {
 				map[cy-viewOffset][cx+i-viewOffset] = view[i];
 				int x = pos[0]+i-viewOffset; int y = pos[1]-viewOffset;
 				Integer[] p = {x,y};
-				if(view[i] == '$'){
-					treasures.add(p);
-				}else if(view[i] == 'k'){
-					keys.add(p);
-				}
+				addToList(p, view[i]);
+				
 			}
 			//System.out.println("north");
 			break;
@@ -101,11 +93,7 @@ public class TreasureMap {
 				map[cy-viewOffset+i][cx+viewOffset] = view[i];
 				int x = pos[0]+viewOffset; int y = pos[1]+i-viewOffset;
 				Integer[] p = {x,y};
-				if(view[i] == '$'){
-					treasures.add(p);
-				}else if(view[i] == 'k'){
-					keys.add(p);
-				}
+				addToList(p, view[i]);
 			}
 			//System.out.println("east");
 			break;
@@ -118,11 +106,7 @@ public class TreasureMap {
 				map[cy+viewOffset][cx+i-viewOffset] = view[view.length-1-i];
 				int x = pos[0]+i-viewOffset; int y = pos[1]+viewOffset;
 				Integer[] p = {x,y};
-				if(view[i] == '$'){
-					treasures.add(p);
-				}else if(view[i] == 'k'){
-					keys.add(p);
-				}
+				addToList(p, view[i]);
 			}
 			//System.out.println("south");
 			break;
@@ -136,14 +120,26 @@ public class TreasureMap {
 				map[cy+i-viewOffset][cx-viewOffset] = view[view.length-1-i];
 				int x = pos[0]-viewOffset; int y = pos[1]+i-viewOffset;
 				Integer[] p = {x,y};
-				if(view[i] == '$'){
-					treasures.add(p);
-				}else if(view[i] == 'k'){
-					keys.add(p);
-				}
+				addToList(p, view[i]);
 			}
 			//System.out.println("west");
 			break;
+		}
+	}
+	private void addToList(Integer[] p, char c){
+		switch(c){
+		case '$':
+			treasures.add(p); break;
+		case 'k':
+			keys.add(p); break;
+		case '-':
+			doors.add(p); break;
+		case 'd':
+			dynamite.add(p); break;
+		case 'a':
+			axes.add(p); break;
+		case 'T':
+			trees.add(p); break;
 		}
 	}
 	public char getCharAt(int x, int y){
@@ -225,8 +221,8 @@ public class TreasureMap {
 		return r;
 	}
 	
-	public boolean isCharAtPosition(int[] pos, char c){
-		return map[pos[1]+centre][pos[0]+centre] == c;
+	public boolean isCharAtPosition(int x, int y, char c){
+		return map[y+centre][x+centre] == c;
 	}
 	
 	public boolean hasTreasure(int x, int y){
@@ -246,8 +242,8 @@ public class TreasureMap {
 		return c == '*' || c == 'T' || c == '~' || c == '-' || c == 'u';
 	}
 	
-	public boolean isBlockedAt(int x, int y, boolean hasBoat){
+	public boolean isBlockedAt(int x, int y, boolean hasBoat, boolean hasKey){
 		char c = map[y+centre][x+centre];
-		return c == '*' || c == '.' || c == 'T' || (hasBoat && c == '~');
+		return c == '*' || c == '.' || c == 'T' || (!hasBoat && c == '~') || (!hasKey && c == '-');
 	}
 }
