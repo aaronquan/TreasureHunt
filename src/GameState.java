@@ -112,7 +112,7 @@ public class GameState {
 		//backwards
 		Direction relativeBack = direction.copy().turnLeft().turnLeft();
 		int[] vb = relativeBack.getVector1();
-		if(map.isCharAtPosition(position[0]+vr[0], position[1]+vr[1], '-')){
+		if(map.isCharAtPosition(position[0]+vb[0], position[1]+vb[1], '-')){
 			gameStates[3] = new GameState(position[0]+vb[0], position[1]+vb[1], relativeBack, movesSoFar+"lluf");
 		}else{
 			gameStates[3] = new GameState(position[0]+vb[0], position[1]+vb[1], relativeBack, movesSoFar+"llf");

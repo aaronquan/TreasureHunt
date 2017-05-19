@@ -67,7 +67,7 @@ public class MultiGoal implements Ai{
 			}else if(map.isCharAtPosition(position[0]+v[0], position[1]+v[1], 'k')){
 				hasKey = true;
 			}
-			else if(!map.isBlockedAt(position[0]+v[0], position[1]+v[1])){
+			if(!map.isBlockedAt(position[0]+v[0], position[1]+v[1])){
 				if(!backing){
 					Integer bt[] = {position[0], position[1]};
 					backtracker.add(bt);
