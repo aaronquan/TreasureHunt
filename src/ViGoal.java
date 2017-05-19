@@ -13,6 +13,7 @@ public class ViGoal implements Ai{
 	
 	private boolean hasTreasure;
 	private boolean hasKey;
+	private boolean hasAxe;
 	
 	//searching
 	private boolean[][] discovered;
@@ -29,6 +30,7 @@ public class ViGoal implements Ai{
 		commandBuffer = "";
 		hasTreasure = false;
 		hasKey = false;
+		hasAxe = false;
 		
 		int ms = map.getMapSize();
 		discovered = new boolean[ms][ms];
@@ -50,6 +52,8 @@ public class ViGoal implements Ai{
 	}
 	
 	private void updateUsingLastMove(char[][] view){
+		int[] v = currentDirection.getVector1();
+		int[] cv = {position[0]+v[0], position[1]+v[1]};
 		if(lastMove == 'l'){
 			currentDirection = currentDirection.turnLeft();
 			map.changePlayerDirection(position, currentDirection);
@@ -59,15 +63,16 @@ public class ViGoal implements Ai{
 			map.changePlayerDirection(position, currentDirection);
 		}
 		else if(lastMove == 'f'){
-			int[] v = currentDirection.getVector1();
 			//test for treasure
-			if(map.isCharAtPosition(position[0]+v[0], position[1]+v[1], '$')){
+			if(map.isCharAtPosition(cv[0], cv[1], '$')){
 				hasTreasure = true;
-				System.out.println("has the treasure: "+map.getCharAt(position[0]+v[0], position[1]+v[1]));
-			}else if(map.isCharAtPosition(position[0]+v[0], position[1]+v[1], 'k')){
+				System.out.println("has the treasure: "+map.getCharAt(cv[0], cv[1]));
+			}else if(map.isCharAtPosition(cv[0], cv[1], 'k')){
 				hasKey = true;
+			}else if(map.isCharAtPosition(cv[0], cv[1], 'a')){
+				hasAxe = true;
 			}
-			if(!map.isBlockedAt(position[0]+v[0], position[1]+v[1])){
+			if(!map.isBlockedAt(cv[0], cv[1])){
 				if(!backing){
 					Integer bt[] = {position[0], position[1]};
 					backtracker.add(bt);
@@ -76,17 +81,26 @@ public class ViGoal implements Ai{
 				position[0]+=v[0]; position[1]+=v[1];
 				map.updateMap(view[0], currentDirection, position);	
 			}
+		}else if(lastMove == 'u'){
+			if(map.isCharAtPosition(cv[0], cv[1], '-')){
+				map.setCharAt(cv[0], cv[1], ' ');
+			}
+		}else if(lastMove == 'c'){
+			if(map.isCharAtPosition(cv[0], cv[1], 'T')){
+				map.setCharAt(cv[0], cv[1], ' ');
+			}
 		}
 	}
 	
 	public char makeMove(char[][] view) {
 		char move = 'f';
 		update(view);
+		//move based on commandbuffer
 		if(!commandBuffer.isEmpty()){
 			move = commandBuffer.charAt(0);
 			commandBuffer = commandBuffer.substring(1);
 		}else{
-			//sets goal then gets commands for command buffer
+			//sets goal then gets commands from command buffer
 			if(evaluateMove()){
 				move = commandBuffer.charAt(0);
 				commandBuffer = commandBuffer.substring(1);
@@ -100,13 +114,28 @@ public class ViGoal implements Ai{
 	private boolean evaluateMove(){
 		backing = false;
 		int[] goal = {0,0};
+		//Has treasure, returning to goal
 		if(hasTreasure){
 			goal[0] = 0; goal[1] = 0;
 			if(getCommands(goal)) return true;
 		}
-		for(Integer[] c: map.getTreasures()){
-			goal[0] = c[0]; goal[1] = c[1];
+		//doesnt have treasure, will try to get to treasure if found on map
+		//will keep overwite goal, until last found treasure, then update goals.
+		for(Integer[] m: map.getTreasures()){
+			goal[0] = m[0]; goal[1] = m[1];
 			if(getCommands(goal)) return true;
+		}
+		//same as above, but for keys
+		if(!hasKey && !map.getKeys().isEmpty()){
+			for(Integer[] k: map.getKeys()){
+				goal[0] = k[0]; goal[1] = k[1];
+			}
+		}
+		//same as above, but for axes, but will overwrite keys goal.
+		if(!hasAxe && !map.getAxes().isEmpty()){
+			for(Integer[] a: map.getAxes()){
+				goal[0] = a[0]; goal[1] = a[1];
+			}
 		}
 		
 		//exploring
@@ -117,7 +146,7 @@ public class ViGoal implements Ai{
 		GameState[] neighbours = current.generateNeighbours();
 		for(GameState gs: neighbours){
 			int[] pos = gs.getPosition();
-			if(!map.isBlockedAt(pos[0], pos[1]) && !discovered[pos[0]+hs][pos[1]+hs]){
+			if(isUnblockable(pos[0], pos[1]) && !discovered[pos[0]+hs][pos[1]+hs]){
 				int h = map.getNumUnknowns(pos, gs.getDirection());
 				gs.setHeuristic(h);
 				states.add(gs);
@@ -137,6 +166,15 @@ public class ViGoal implements Ai{
 		return false;
 	}
 	
+	boolean isUnblockable(int x, int y) {
+System.out.println("x = " + x + " y = " + y);
+		if(map.isCharAtPosition(x,y, '-') && hasKey) {
+			System.out.println("dude I am here git me out");
+			return true;
+		}
+		return (!map.isBlockedAt(x, y));
+	}
+
 	//use goal and find commands to reach the goal
 	//false if no commands are gotten
 	private boolean getCommands(int[] goal){
@@ -154,26 +192,75 @@ public class ViGoal implements Ai{
 		
 		while(!states.isEmpty()){
 			GameState currentState = states.poll();
+			int[] cp = currentState.getPosition();
+			
+			GameState[] gs = new GameState[4];
+			
+			Direction df = currentState.getDirection();
+			int[] vf = df.getVector1();
+			int[] cvf = {cp[0]+vf[0], cp[1]+vf[1]};
 
-			GameState[] toEvaluate = currentState.generateNeighbours();
-			for(int i = 0; i < toEvaluate.length; i++){
-				if(toEvaluate[i].checkGoal(goal)){
-					commandBuffer = toEvaluate[i].getMoves();
+			if(map.isCharAtPosition(cvf[0], cvf[1], '-') && hasKey){
+				System.out.println("DI I GO INEHRAEHDS");
+
+				gs[0] = new GameState(cvf[0], cvf[1], df, currentState.getMoves()+"uf");
+			} else if(!map.isBlockedAt(cvf[0], cvf[1])){
+				gs[0] = new GameState(cvf[0], cvf[1], df, currentState.getMoves()+"f");
+			}
+			
+			Direction dl = df.turnLeft();
+			int[] vl = dl.getVector1();
+			int[] cvl = {cp[0]+vl[0], cp[1]+vl[1]};
+
+//swapped the following around
+			if(map.isCharAtPosition(cvl[0], cvl[1], '-') && hasKey){
+
+				gs[1] = new GameState(cvl[0], cvl[1], dl, currentState.getMoves()+"luf");
+			} else if(!map.isBlockedAt(cvl[0], cvl[1])){
+				gs[1] = new GameState(cvl[0], cvl[1], dl, currentState.getMoves()+"lf");
+			}
+
+			
+			Direction dr = df.turnRight();
+			int[] vr = dr.getVector1();
+			int[] cvr = {cp[0]+vr[0], cp[1]+vr[1]};
+			if(map.isCharAtPosition(cvr[0], cvr[1], '-') && hasKey){
+
+				gs[2] = new GameState(cvr[0], cvr[1], dr, currentState.getMoves()+"ruf");
+			}else if(!map.isBlockedAt(cvr[0], cvr[1])){
+				gs[2] = new GameState(cvr[0], cvr[1], dr, currentState.getMoves()+"rf");
+			}
+			
+			Direction db = df.turnLeft().turnLeft();
+			int[] vb = db.getVector1();
+			int[] cvb = {cp[0]+vb[0], cp[1]+vb[1]};
+			if(map.isCharAtPosition(cvb[0], cvb[1], '-') && hasKey){
+				gs[3] = new GameState(cvb[0], cvb[1], db, currentState.getMoves()+"lluf");
+			} else if(!map.isBlockedAt(cvb[0], cvb[1])){
+				gs[3] = new GameState(cvb[0], cvb[1], db, currentState.getMoves()+"llf");
+			}
+
+			
+
+			//GameState[] toEvaluate = currentState.generateNeighbours();
+			for(int i = 0; i < gs.length; i++){
+				if(gs[i] == null) continue;
+				if(gs[i].checkGoal(goal)){
+					commandBuffer = gs[i].getMoves();
 					System.out.println(commandBuffer);
 					return true;
 				}
-				int[] pos = toEvaluate[i].getPosition();
+				int[] pos = gs[i].getPosition();
 				//System.out.println(pos[0]);
-				if(!map.isBlockedAt(pos[0], pos[1])){
-					if(!visited[pos[0]+hs][pos[1]+hs]){
-						toEvaluate[i].calculateHeuristic(goal);
-						states.add(toEvaluate[i]);
-						visited[pos[0]+hs][pos[1]+hs] = true;
-					}
+				if(!visited[pos[0]+hs][pos[1]+hs]){
+					gs[i].calculateHeuristic(goal);
+					states.add(gs[i]);
+					visited[pos[0]+hs][pos[1]+hs] = true;
 				}
 			}
 			
 		}
 		return false;
 	}
+	
 }
