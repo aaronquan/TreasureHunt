@@ -123,6 +123,7 @@ public class ViGoal implements Ai{
 		//will keep overwite goal, until last found treasure, then update goals.
 		for(Integer[] m: map.getTreasures()){
 			goal[0] = m[0]; goal[1] = m[1];
+
 			if(getCommands(goal)) return true;
 		}
 		//same as above, but for keys
@@ -130,6 +131,8 @@ public class ViGoal implements Ai{
 			for(Integer[] k: map.getKeys()){
 				goal[0] = k[0]; goal[1] = k[1];
 			}
+			getCommands(goal);
+			return true;
 		}
 		//same as above, but for axes, but will overwrite keys goal.
 		if(!hasAxe && !map.getAxes().isEmpty()){
@@ -144,12 +147,20 @@ public class ViGoal implements Ai{
 		PriorityQueue<GameState> states = new PriorityQueue<GameState>(gsc);
 		GameState current = new GameState(position[0], position[1], currentDirection);
 		GameState[] neighbours = current.generateNeighbours();
+
 		for(GameState gs: neighbours){
 			int[] pos = gs.getPosition();
 			if(isUnblockable(pos[0], pos[1]) && !discovered[pos[0]+hs][pos[1]+hs]){
+
 				int h = map.getNumUnknowns(pos, gs.getDirection());
+
+				System.out.println("h = " + h);
+
 				gs.setHeuristic(h);
 				states.add(gs);
+				goal = pos;
+				getCommands(goal);
+				return true;
 			}
 		}
 		if(!states.isEmpty()){
@@ -158,11 +169,14 @@ public class ViGoal implements Ai{
 			int[] pos = next.getPosition();
 			discovered[pos[0]+hs][pos[1]+hs] = true;
 			return true;
-		}else if(!backtracker.isEmpty()){
+		}
+
+		if(!backtracker.isEmpty()){
 			Integer[] back = backtracker.removeLast();
 			goal[0] = back[0]; goal[1] = back[1];
 			if (backing = getCommands(goal)) return true;
 		}
+
 		return false;
 	}
 	

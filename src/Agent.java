@@ -78,7 +78,8 @@ public class Agent {
       
       //agent.ai = new PathFinder(); //change ai here
       //agent.ai = new MultiGoal();
-      agent.ai = new MultiGoalAction();
+      //agent.ai = new MultiGoalAction();
+      agent.ai = new ViGoal();
 
       if( args.length < 2 ) {
          System.out.println("Usage: java Agent -p <port>\n");
