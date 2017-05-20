@@ -107,7 +107,7 @@ public class TreasureMap {
 				map[cy+viewOffset][cx+i-viewOffset] = view[view.length-1-i];
 				int x = pos[0]+i-viewOffset; int y = pos[1]+viewOffset;
 				Integer[] p = {x,y};
-				addToList(p, view[i]);
+				addToList(p, view[4-i]);
 			}
 			//System.out.println("south");
 			break;
