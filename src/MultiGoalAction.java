@@ -17,7 +17,7 @@ public class MultiGoalAction implements Ai{
 	private boolean hasRaft;
 	
 	//searching
-	private boolean[][] discovered;
+	private Section discovered;
 	private LinkedList<Integer[]> backtracker;
 	private boolean backing;
 	
@@ -29,13 +29,13 @@ public class MultiGoalAction implements Ai{
 		currentDirection = Direction.NORTH;
 		map = new TreasureMap();
 		commandBuffer = "";
+		
 		hasTreasure = false;
 		hasKey = false;
 		hasAxe = false;
 		hasRaft = false;
 		
-		int ms = map.getMapSize();
-		discovered = new boolean[ms][ms];
+		discovered = new Section(map.getMapSize());
 		backtracker = new LinkedList<Integer[]>();
 		backing = false;
 	}
@@ -43,12 +43,11 @@ public class MultiGoalAction implements Ai{
 	private void update(char view[][]){
 		if(moves == 0){
 			map.addStartingView(view);
-			int hs = map.getMapSize()/2;
-			discovered[hs][hs] = true;
+			discovered.setTrue(0, 0);
 		}else{
 			updateUsingLastMove(view);
 		}
-		//map.printMap();
+		map.printMap();
 	}
 	
 	private void updateUsingLastMove(char[][] view){
@@ -64,7 +63,6 @@ public class MultiGoalAction implements Ai{
 		}
 		else if(lastMove == 'f'){
 			//test for treasure
-			int hs = map.getMapSize()/2;
 			if(map.isCharAtPosition(cv[0], cv[1], '$')){
 				hasTreasure = true;
 				System.out.println("has the treasure: "+map.getCharAt(cv[0], cv[1]));
@@ -74,7 +72,7 @@ public class MultiGoalAction implements Ai{
 				hasAxe = true;
 			}
 			if(!map.isBlockedAt(cv[0], cv[1])){
-				discovered[cv[0]+hs][cv[1]+hs] = true;
+				discovered.setTrue(cv[0], cv[1]);
 				if(!backing){
 					Integer bt[] = {position[0], position[1]};
 					backtracker.add(bt);
@@ -136,14 +134,13 @@ public class MultiGoalAction implements Ai{
 		}
 		
 		//exploring
-		int hs = map.getMapSize()/2;
 		Comparator<GameState> gsc = new GameStateComparator(false);
 		PriorityQueue<GameState> states = new PriorityQueue<GameState>(gsc);
 		GameState current = new GameState(position[0], position[1], currentDirection);
 		GameState[] neighbours = current.generateNeighbours();
 		for(GameState gs: neighbours){
 			int[] pos = gs.getPosition();
-			if(!map.isBlockedAt(pos[0], pos[1]) && !discovered[pos[0]+hs][pos[1]+hs]){
+			if(!map.isBlockedAt(pos[0], pos[1]) && !discovered.getValue(pos[0], pos[1])){
 				int h = map.getNumUnknowns(pos, gs.getDirection());
 				gs.setHeuristic(h);
 				states.add(gs);
@@ -152,8 +149,6 @@ public class MultiGoalAction implements Ai{
 		if(!states.isEmpty()){
 			GameState next = states.poll();
 			commandBuffer = next.getMoves();
-			int[] pos = next.getPosition();
-			discovered[pos[0]+hs][pos[1]+hs] = true;
 			return true;
 		}else if(!backtracker.isEmpty()){
 			Integer[] back = backtracker.removeLast();
@@ -166,80 +161,78 @@ public class MultiGoalAction implements Ai{
 	//use goal and find commands to reach the goal
 	//false if no commands are gotten
 	private boolean getCommands(int[] goal){
-		int ms = map.getMapSize();
-		int hs = ms/2;
-		boolean[][] visited = new boolean[ms][ms]; //should all be false
-		
+		Section visited = new Section(map.getMapSize());
 		Comparator<GameState> gsc = new GameStateComparator(false);
-		
 		PriorityQueue<GameState> states = new PriorityQueue<GameState>(gsc);
 		GameState init = new GameState(position[0], position[1], currentDirection);
-		visited[position[0]+hs][position[1]+hs] = true;
-		
+		visited.setTrue(position[0], position[1]);
 		states.add(init);
-		
 		while(!states.isEmpty()){
 			GameState currentState = states.poll();
-			int[] cp = currentState.getPosition();
-			
-			GameState[] gs = new GameState[4];
-			
-			Direction df = currentState.getDirection();
-			int[] vf = df.getVector1();
-			int[] cvf = {cp[0]+vf[0], cp[1]+vf[1]};
-			if(!map.isBlockedAt(cvf[0], cvf[1])){
-				gs[0] = new GameState(cvf[0], cvf[1], df, currentState.getMoves()+"f");
-			}else if(map.isCharAtPosition(cvf[0], cvf[1], '-') && hasKey){
-				gs[0] = new GameState(cvf[0], cvf[1], df, currentState.getMoves()+"uf");
-			}
-			
-			Direction dl = df.turnLeft();
-			int[] vl = dl.getVector1();
-			int[] cvl = {cp[0]+vl[0], cp[1]+vl[1]};
-			if(!map.isBlockedAt(cvl[0], cvl[1])){
-				gs[1] = new GameState(cvl[0], cvl[1], dl, currentState.getMoves()+"lf");
-			}else if(map.isCharAtPosition(cvl[0], cvl[1], '-') && hasKey){
-				gs[1] = new GameState(cvl[0], cvl[1], dl, currentState.getMoves()+"luf");
-			}
-			
-			Direction dr = df.turnRight();
-			int[] vr = dr.getVector1();
-			int[] cvr = {cp[0]+vr[0], cp[1]+vr[1]};
-			if(!map.isBlockedAt(cvr[0], cvr[1])){
-				gs[2] = new GameState(cvr[0], cvr[1], dr, currentState.getMoves()+"rf");
-			}else if(map.isCharAtPosition(cvr[0], cvr[1], '-') && hasKey){
-				gs[2] = new GameState(cvr[0], cvr[1], dr, currentState.getMoves()+"ruf");
-			}
-			
-			Direction db = df.turnLeft().turnLeft();
-			int[] vb = db.getVector1();
-			int[] cvb = {cp[0]+vb[0], cp[1]+vb[1]};
-			if(!map.isBlockedAt(cvb[0], cvb[1])){
-				gs[3] = new GameState(cvb[0], cvb[1], db, currentState.getMoves()+"llf");
-			}else if(map.isCharAtPosition(cvb[0], cvb[1], '-') && hasKey){
-				gs[3] = new GameState(cvb[0], cvb[1], db, currentState.getMoves()+"lluf");
-			}
-			
-
-			//GameState[] toEvaluate = currentState.generateNeighbours();
-			for(int i = 0; i < gs.length; i++){
-				if(gs[i] == null) continue;
-				if(gs[i].checkGoal(goal)){
-					commandBuffer = gs[i].getMoves();
+			List<GameState> gs = getNeighbouringGameStates(currentState);
+			for(GameState next: gs){
+				if(next.checkGoal(goal)){
+					commandBuffer = next.getMoves();
 					System.out.println(commandBuffer);
 					return true;
 				}
-				int[] pos = gs[i].getPosition();
-				//System.out.println(pos[0]);
-				if(!visited[pos[0]+hs][pos[1]+hs]){
-					gs[i].calculateHeuristic(goal);
-					states.add(gs[i]);
-					visited[pos[0]+hs][pos[1]+hs] = true;
+				int[] pos = next.getPosition();
+				if(!visited.getValue(pos[0], pos[1])){
+					next.calculateHeuristic(goal);
+					states.add(next);
+					visited.setTrue(pos[0], pos[1]);
 				}
 			}
-			
 		}
 		return false;
 	}
-	
+	private List<GameState> getNeighbouringGameStates(GameState gs){
+		List<GameState> neighbours = new LinkedList<GameState>();
+		int[] cp = gs.getPosition();
+		Direction df = gs.getDirection();
+		String moves = gs.getMoves();
+		int[] vf = df.getVector1();
+		int[] cvf = {cp[0]+vf[0], cp[1]+vf[1]};
+		if(!map.isWallOrWaterAt(cvf[0], cvf[1])){
+			neighbours.add(new GameState(cvf[0], cvf[1], df, moves+"f"));
+		}else if(map.isCharAtPosition(cvf[0], cvf[1], '-') && hasKey){
+			neighbours.add(new GameState(cvf[0], cvf[1], df, moves+"uf"));
+		}else if(map.isCharAtPosition(cvf[0], cvf[1], 'T') && hasAxe){
+			neighbours.add(new GameState(cvf[0], cvf[1], df, moves+"cf"));
+		}
+		
+		Direction dl = df.turnLeft();
+		int[] vl = dl.getVector1();
+		int[] cvl = {cp[0]+vl[0], cp[1]+vl[1]};
+		if(!map.isWallOrWaterAt(cvl[0], cvl[1])){
+			neighbours.add(new GameState(cvl[0], cvl[1], dl, moves+"lf"));
+		}else if(map.isCharAtPosition(cvl[0], cvl[1], '-') && hasKey){
+			neighbours.add(new GameState(cvl[0], cvl[1], dl, moves+"luf"));
+		}else if(map.isCharAtPosition(cvl[0], cvl[1], 'T') && hasAxe){
+			neighbours.add(new GameState(cvl[0], cvl[1], dl, moves+"lcf"));
+		}
+		
+		Direction dr = df.turnRight();
+		int[] vr = dr.getVector1();
+		int[] cvr = {cp[0]+vr[0], cp[1]+vr[1]};
+		if(!map.isWallOrWaterAt(cvr[0], cvr[1])){
+			neighbours.add(new GameState(cvr[0], cvr[1], dr, moves+"rf"));
+		}else if(map.isCharAtPosition(cvr[0], cvr[1], '-') && hasKey){
+			neighbours.add(new GameState(cvr[0], cvr[1], dr, moves+"ruf"));
+		}else if(map.isCharAtPosition(cvr[0], cvr[1], 'T') && hasAxe){
+			neighbours.add(new GameState(cvr[0], cvr[1], dr, moves+"rcf"));
+		}
+		
+		Direction db = df.turnLeft().turnLeft();
+		int[] vb = db.getVector1();
+		int[] cvb = {cp[0]+vb[0], cp[1]+vb[1]};
+		if(!map.isWallOrWaterAt(cvb[0], cvb[1])){
+			neighbours.add(new GameState(cvb[0], cvb[1], db, moves+"llf"));
+		}else if(map.isCharAtPosition(cvb[0], cvb[1], '-') && hasKey){
+			neighbours.add(new GameState(cvb[0], cvb[1], db, moves+"lluf"));
+		}else if(map.isCharAtPosition(cvb[0], cvb[1], 'T') && hasAxe){
+			neighbours.add(new GameState(cvb[0], cvb[1], db, moves+"llcf"));
+		}
+		return neighbours;
+	}
 }

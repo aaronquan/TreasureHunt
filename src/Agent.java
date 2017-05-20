@@ -20,15 +20,15 @@ public class Agent {
 
       //System.out.print("Enter Action(s): ");
 
-      //try {
+      try {
          while ( ch != -1 ) {
             // read character from keyboard
         	//ch = System.in.read();
         	
         	if (ai != null)
             ch = ai.makeMove(view);
-        	
-            //ch = System.in.read();
+        	else
+            ch = System.in.read();
 
             switch( ch ) { // if character is a valid action, return it
             case 'F': case 'L': case 'R': case 'C': case 'U': case 'B':
@@ -36,10 +36,10 @@ public class Agent {
                return((char) ch );
             }
          }
-      //}
-      //catch (IOException e) {
-      //   System.out.println ("IO error:" + e );
-      //}
+      }
+      catch (IOException e) {
+         System.out.println ("IO error:" + e );
+      }
 
       return 0;
    }
@@ -78,8 +78,8 @@ public class Agent {
       
       //agent.ai = new PathFinder(); //change ai here
       //agent.ai = new MultiGoal();
-      //agent.ai = new MultiGoalAction();
-      agent.ai = new ViGoal();
+      agent.ai = new MultiGoalAction();
+      //agent.ai = new ViGoal();
 
       if( args.length < 2 ) {
          System.out.println("Usage: java Agent -p <port>\n");

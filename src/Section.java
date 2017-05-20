@@ -12,13 +12,21 @@ public class Section {
 	public void setValue(int x, int y, boolean b){
 		section[x+halfSize][y+halfSize] = b;
 	}
+	public void setTrue(int x, int y){
+		section[x+halfSize][y+halfSize] = true;
+	}
 	public boolean getValue(int x, int y){
 		return section[x+halfSize][y+halfSize];
 	}
 	
 	//returns equality
 	public boolean isEqual(Section s){
-		return false;
+		for(int i = 0; i < size; i++){
+			for(int j = 0; j < size; j++){
+				if(section[i][j] != s.getValue(i, j)) return false;
+			}
+		}
+		return true;
 	}
 	
 	//returns whether s is a subset of this

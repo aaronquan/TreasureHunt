@@ -273,7 +273,12 @@ public class TreasureMap {
 	
 	public boolean isBlockedAt(int x, int y){
 		char c = map[y+centre][x+centre];
-		return c == '*' || c == 'T' || c == '~' || c == '-' || c == 'u';
+		return c == '*' || c == 'T' || c == '~' || c == '-' || c == 'u' || c == '.';
+	}
+	
+	public boolean isWallOrWaterAt(int x, int y){
+		char c = map[y+centre][x+centre];
+		return c == '*' || c == '~' || c == 'u' || c == '.';
 	}
 	
 	public boolean isBlockedAt(int x, int y, boolean hasBoat, boolean hasKey){

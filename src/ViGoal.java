@@ -48,7 +48,7 @@ public class ViGoal implements Ai{
 			discovered[position[0]+hs][position[1]+hs] = true;
 			updateUsingLastMove(view);
 		}
-		map.printMap();
+		//map.printMap();
 	}
 	
 	private void updateUsingLastMove(char[][] view){
@@ -181,7 +181,7 @@ public class ViGoal implements Ai{
 	}
 	
 	boolean isUnblockable(int x, int y) {
-System.out.println("x = " + x + " y = " + y);
+		System.out.println("x = " + x + " y = " + y);
 		if(map.isCharAtPosition(x,y, '-') && hasKey) {
 			System.out.println("dude I am here git me out");
 			return true;
@@ -216,7 +216,6 @@ System.out.println("x = " + x + " y = " + y);
 
 			if(map.isCharAtPosition(cvf[0], cvf[1], '-') && hasKey){
 				System.out.println("DI I GO INEHRAEHDS");
-
 				gs[0] = new GameState(cvf[0], cvf[1], df, currentState.getMoves()+"uf");
 			} else if(!map.isBlockedAt(cvf[0], cvf[1])){
 				gs[0] = new GameState(cvf[0], cvf[1], df, currentState.getMoves()+"f");
@@ -226,7 +225,7 @@ System.out.println("x = " + x + " y = " + y);
 			int[] vl = dl.getVector1();
 			int[] cvl = {cp[0]+vl[0], cp[1]+vl[1]};
 
-//swapped the following around
+			//swapped the following around
 			if(map.isCharAtPosition(cvl[0], cvl[1], '-') && hasKey){
 
 				gs[1] = new GameState(cvl[0], cvl[1], dl, currentState.getMoves()+"luf");
