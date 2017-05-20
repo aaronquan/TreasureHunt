@@ -123,7 +123,7 @@ public class ViGoal implements Ai{
 		//will keep overwite goal, until last found treasure, then update goals.
 		for(Integer[] m: map.getTreasures()){
 			goal[0] = m[0]; goal[1] = m[1];
-
+			System.out.println("asdasd, x = " + m[0] + " y = " + m[1] + "\nmy currposition x = "+ position[0] +" y = " +position[1]);
 			if(getCommands(goal)) return true;
 		}
 		//same as above, but for keys
@@ -131,8 +131,7 @@ public class ViGoal implements Ai{
 			for(Integer[] k: map.getKeys()){
 				goal[0] = k[0]; goal[1] = k[1];
 			}
-			getCommands(goal);
-			return true;
+			if(getCommands(goal)) return true;
 		}
 		//same as above, but for axes, but will overwrite keys goal.
 		if(!hasAxe && !map.getAxes().isEmpty()){
@@ -159,8 +158,8 @@ public class ViGoal implements Ai{
 				gs.setHeuristic(h);
 				states.add(gs);
 				goal = pos;
-				getCommands(goal);
-				return true;
+				if(getCommands(goal))
+					return true;
 			}
 		}
 		if(!states.isEmpty()){
@@ -211,6 +210,7 @@ public class ViGoal implements Ai{
 			GameState[] gs = new GameState[4];
 			
 			Direction df = currentState.getDirection();
+<<<<<<< HEAD
 			int[] vf = df.getVector1();
 			int[] cvf = {cp[0]+vf[0], cp[1]+vf[1]};
 
@@ -234,28 +234,19 @@ public class ViGoal implements Ai{
 			}
 
 			
+=======
+			gs[0] = commandHelper(cp[0], cp[1], df, currentState, "");
+			//gamestate to add to turn left
+			Direction dl = df.turnLeft();
+			gs[1] = commandHelper(cp[0], cp[1], dl, currentState, "l");
+			//gamestate to add to turn right
+>>>>>>> origin/master
 			Direction dr = df.turnRight();
-			int[] vr = dr.getVector1();
-			int[] cvr = {cp[0]+vr[0], cp[1]+vr[1]};
-			if(map.isCharAtPosition(cvr[0], cvr[1], '-') && hasKey){
-
-				gs[2] = new GameState(cvr[0], cvr[1], dr, currentState.getMoves()+"ruf");
-			}else if(!map.isBlockedAt(cvr[0], cvr[1])){
-				gs[2] = new GameState(cvr[0], cvr[1], dr, currentState.getMoves()+"rf");
-			}
-			
+			gs[2] = commandHelper(cp[0], cp[1], dr, currentState, "r");
+			//gamestate to add to do a 180 (turn left twice)
 			Direction db = df.turnLeft().turnLeft();
-			int[] vb = db.getVector1();
-			int[] cvb = {cp[0]+vb[0], cp[1]+vb[1]};
-			if(map.isCharAtPosition(cvb[0], cvb[1], '-') && hasKey){
-				gs[3] = new GameState(cvb[0], cvb[1], db, currentState.getMoves()+"lluf");
-			} else if(!map.isBlockedAt(cvb[0], cvb[1])){
-				gs[3] = new GameState(cvb[0], cvb[1], db, currentState.getMoves()+"llf");
-			}
+			gs[3] = commandHelper(cp[0], cp[1], db, currentState, "ll");
 
-			
-
-			//GameState[] toEvaluate = currentState.generateNeighbours();
 			for(int i = 0; i < gs.length; i++){
 				if(gs[i] == null) continue;
 				if(gs[i].checkGoal(goal)){
@@ -271,9 +262,20 @@ public class ViGoal implements Ai{
 					visited[pos[0]+hs][pos[1]+hs] = true;
 				}
 			}
-			
 		}
 		return false;
+	}
+
+	GameState commandHelper(int x, int y, Direction d, GameState currState, String move) {
+		int[] v = d.getVector1();
+		int[] cvf = {x+v[0], y+v[1]};
+		if(map.isCharAtPosition(cvf[0], cvf[1], '-') && hasKey){
+			return new GameState(cvf[0], cvf[1], d, currState.getMoves()+move+"uf");
+		} else if(!map.isBlockedAt(cvf[0] , cvf[1])){
+			return new GameState(cvf[0] , cvf[1], d, currState.getMoves()+move+"f");
+		}
+
+		return null;
 	}
 	
 }
