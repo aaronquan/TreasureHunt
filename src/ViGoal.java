@@ -210,37 +210,11 @@ public class ViGoal implements Ai{
 			GameState[] gs = new GameState[4];
 			
 			Direction df = currentState.getDirection();
-<<<<<<< HEAD
-			int[] vf = df.getVector1();
-			int[] cvf = {cp[0]+vf[0], cp[1]+vf[1]};
-
-			if(map.isCharAtPosition(cvf[0], cvf[1], '-') && hasKey){
-				System.out.println("DI I GO INEHRAEHDS");
-				gs[0] = new GameState(cvf[0], cvf[1], df, currentState.getMoves()+"uf");
-			} else if(!map.isBlockedAt(cvf[0], cvf[1])){
-				gs[0] = new GameState(cvf[0], cvf[1], df, currentState.getMoves()+"f");
-			}
-			
-			Direction dl = df.turnLeft();
-			int[] vl = dl.getVector1();
-			int[] cvl = {cp[0]+vl[0], cp[1]+vl[1]};
-
-			//swapped the following around
-			if(map.isCharAtPosition(cvl[0], cvl[1], '-') && hasKey){
-
-				gs[1] = new GameState(cvl[0], cvl[1], dl, currentState.getMoves()+"luf");
-			} else if(!map.isBlockedAt(cvl[0], cvl[1])){
-				gs[1] = new GameState(cvl[0], cvl[1], dl, currentState.getMoves()+"lf");
-			}
-
-			
-=======
 			gs[0] = commandHelper(cp[0], cp[1], df, currentState, "");
 			//gamestate to add to turn left
 			Direction dl = df.turnLeft();
 			gs[1] = commandHelper(cp[0], cp[1], dl, currentState, "l");
 			//gamestate to add to turn right
->>>>>>> origin/master
 			Direction dr = df.turnRight();
 			gs[2] = commandHelper(cp[0], cp[1], dr, currentState, "r");
 			//gamestate to add to do a 180 (turn left twice)
