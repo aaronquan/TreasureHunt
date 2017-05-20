@@ -14,6 +14,7 @@ public class MultiGoalAction implements Ai{
 	private boolean hasTreasure;
 	private boolean hasKey;
 	private boolean hasAxe;
+	private boolean hasRaft;
 	
 	//searching
 	private boolean[][] discovered;
@@ -31,6 +32,7 @@ public class MultiGoalAction implements Ai{
 		hasTreasure = false;
 		hasKey = false;
 		hasAxe = false;
+		hasRaft = false;
 		
 		int ms = map.getMapSize();
 		discovered = new boolean[ms][ms];
@@ -44,8 +46,6 @@ public class MultiGoalAction implements Ai{
 			int hs = map.getMapSize()/2;
 			discovered[hs][hs] = true;
 		}else{
-			int hs = map.getMapSize()/2;
-			discovered[position[0]+hs][position[1]+hs] = true;
 			updateUsingLastMove(view);
 		}
 		//map.printMap();
@@ -64,6 +64,7 @@ public class MultiGoalAction implements Ai{
 		}
 		else if(lastMove == 'f'){
 			//test for treasure
+			int hs = map.getMapSize()/2;
 			if(map.isCharAtPosition(cv[0], cv[1], '$')){
 				hasTreasure = true;
 				System.out.println("has the treasure: "+map.getCharAt(cv[0], cv[1]));
@@ -73,6 +74,7 @@ public class MultiGoalAction implements Ai{
 				hasAxe = true;
 			}
 			if(!map.isBlockedAt(cv[0], cv[1])){
+				discovered[cv[0]+hs][cv[1]+hs] = true;
 				if(!backing){
 					Integer bt[] = {position[0], position[1]};
 					backtracker.add(bt);
@@ -88,6 +90,7 @@ public class MultiGoalAction implements Ai{
 		}else if(lastMove == 'c'){
 			if(map.isCharAtPosition(cv[0], cv[1], 'T')){
 				map.setCharAt(cv[0], cv[1], ' ');
+				hasRaft = true;
 			}
 		}
 	}
