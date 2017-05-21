@@ -14,6 +14,9 @@ public class ViGoal implements Ai{
 	private boolean hasTreasure;
 	private boolean hasKey;
 	private boolean hasAxe;
+	private boolean hasRaft;
+	private boolean onWater;
+	private int hasDynamite;
 	
 	//searching
 	private boolean[][] discovered;
@@ -31,6 +34,7 @@ public class ViGoal implements Ai{
 		hasTreasure = false;
 		hasKey = false;
 		hasAxe = false;
+		onWater =false;
 		
 		int ms = map.getMapSize();
 		discovered = new boolean[ms][ms];
@@ -245,6 +249,9 @@ System.out.println("x = " + x + " y = " + y);
 		int[] cvf = {x+v[0], y+v[1]};
 		if(map.isCharAtPosition(cvf[0], cvf[1], '-') && hasKey){
 			return new GameState(cvf[0], cvf[1], d, currState.getMoves()+move+"uf");
+		} else if(map.isCharAtPosition(cvf[0], cvf[1], ~) && hasRaft) {
+			onWater = true;
+			return new GameState(cvf[0], cvf[1], d, currState.getMoves()+move+"f");
 		} else if(!map.isBlockedAt(cvf[0] , cvf[1])){
 			return new GameState(cvf[0] , cvf[1], d, currState.getMoves()+move+"f");
 		}
