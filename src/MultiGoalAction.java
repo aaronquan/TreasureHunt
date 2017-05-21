@@ -35,7 +35,7 @@ public class MultiGoalAction implements Ai{
 		hasAxe = false;
 		hasRaft = false;
 		
-		discovered = new Section(map.getMapSize());
+		discovered = new Section();
 		backtracker = new LinkedList<Integer[]>();
 		backing = false;
 	}
@@ -161,7 +161,7 @@ public class MultiGoalAction implements Ai{
 	//use goal and find commands to reach the goal
 	//false if no commands are gotten
 	private boolean getCommands(int[] goal){
-		Section visited = new Section(map.getMapSize());
+		Section visited = new Section();
 		Comparator<GameState> gsc = new GameStateComparator(false);
 		PriorityQueue<GameState> states = new PriorityQueue<GameState>(gsc);
 		GameState init = new GameState(position[0], position[1], currentDirection);

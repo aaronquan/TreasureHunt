@@ -152,7 +152,7 @@ public class TreasureMap {
 	public char[][] getMap(){
 		return map;
 	}
-	public int getMapSize(){
+	public static int getMapSize(){
 		return mapSize;
 	}
 	
