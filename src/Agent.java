@@ -76,9 +76,9 @@ public class Agent {
       int ch;
       int i,j;
       
-      //agent.ai = new PathFinder(); //change ai here
+      agent.ai = new SmartHunter(); //change ai here
       //agent.ai = new MultiGoal();
-      agent.ai = new MultiGoalAction();
+      //agent.ai = new MultiGoalAction();
       //agent.ai = new ViGoal();
 
       if( args.length < 2 ) {

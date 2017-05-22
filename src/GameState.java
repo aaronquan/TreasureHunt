@@ -9,9 +9,37 @@ public class GameState {
 	private int heuristic;
 	
 	//private int fValue;
+	private boolean hasRaft;
+	private boolean onWater;
+	private int dynamite;
 	
 	private String movesSoFar;
+	private int forwardMoves;
 	
+	public GameState(int x, int y, Direction d, boolean raft, boolean water, int dyn){
+		position = new int[2];
+		position[0] = x; position[1] = y;
+		direction = d;
+		heuristic = 0;
+		
+		hasRaft = raft;
+		onWater = water;
+		dynamite = dyn;
+		
+		movesSoFar = "";
+	}
+	public GameState(int x, int y, Direction d, boolean raft, boolean water, int dyn, String moves){
+		position = new int[2];
+		position[0] = x; position[1] = y;
+		direction = d;
+		heuristic = 0;
+		
+		hasRaft = raft;
+		onWater = water;
+		dynamite = dyn;
+		
+		movesSoFar = moves;
+	}
 	public GameState(int x, int y, Direction d){
 		position = new int[2];
 		position[0] = x; position[1] = y;
