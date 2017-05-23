@@ -165,7 +165,7 @@ public class SmartHunter implements Ai {
 		Section visited = new Section();
 		Comparator<GameState> gsc = new GameStateComparator(false);
 		PriorityQueue<GameState> states = new PriorityQueue<GameState>(gsc);
-		GameState init = new GameState(position[0], position[1], currentDirection);
+		GameState init = new GameState(position[0], position[1], currentDirection, hasRaft, onWater, 0);
 		visited.setTrue(position[0], position[1]);
 		states.add(init);
 		while(!states.isEmpty()){
@@ -209,12 +209,31 @@ public class SmartHunter implements Ai {
 		int[] cp = gs.getPosition();
 		int[] v = d.getVector1();
 		int[] cb = {cp[0]+v[0], cp[1]+v[1]};
-		if(!map.isWallOrWaterAt(cb[0], cb[1])){
-			return new GameState(cb[0], cb[1], d, soFar+move+"f");
+		
+		boolean gsRaft = gs.hasRaft();
+		boolean gsWater = gs.onWater();
+		int gsDynamite = gs.numDynamite();
+		
+		int gsForward1 = gs.getFMoves()+1;
+		
+		if(!map.isBlockedAt(cb[0], cb[1])){
+			return new GameState(cb[0], cb[1], d, gsRaft, gsWater, gsDynamite, soFar+move+"f", gsForward1);
 		}else if(map.isCharAtPosition(cb[0], cb[1], '-') && hasKey){
-			return new GameState(cb[0], cb[1], d, soFar+move+"uf");
+			return new GameState(cb[0], cb[1], d, gsRaft, gsWater, gsDynamite, soFar+move+"uf", gsForward1);
 		}else if(map.isCharAtPosition(cb[0], cb[1], 'T') && hasAxe){
-			return new GameState(cb[0], cb[1], d, soFar+move+"cf");
+			if(gsWater){
+				return new GameState(cb[0], cb[1], d, false, gsWater, gsDynamite, soFar+move+"cf", gsForward1);
+			}else{
+				return new GameState(cb[0], cb[1], d, true, gsWater, gsDynamite, soFar+move+"cf", gsForward1);
+			}
+		}else if(map.isCharAtPosition(cb[0], cb[1], '*') && gsDynamite > 0){
+			return new GameState(cb[0], cb[1], d, gsRaft, gsWater, gsDynamite-1, soFar+move+"bf", gsForward1);
+		}else if(map.isCharAtPosition(cb[0], cb[1], '~')){
+			if(!gsWater && gsRaft){
+				return new GameState(cb[0], cb[1], d, false, true, gsDynamite, soFar+move+"f", gsForward1);
+			}else if(gsWater){
+				return new GameState(cb[0], cb[1], d, gsRaft, false, gsDynamite, soFar+move+"f", gsForward1);
+			}
 		}
 		
 		return null;

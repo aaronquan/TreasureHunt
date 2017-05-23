@@ -14,7 +14,7 @@ public class GameState {
 	private int dynamite;
 	
 	private String movesSoFar;
-	private int forwardMoves;
+	private int fMoves;
 	
 	public GameState(int x, int y, Direction d, boolean raft, boolean water, int dyn){
 		position = new int[2];
@@ -27,8 +27,9 @@ public class GameState {
 		dynamite = dyn;
 		
 		movesSoFar = "";
+		fMoves = 0;
 	}
-	public GameState(int x, int y, Direction d, boolean raft, boolean water, int dyn, String moves){
+	public GameState(int x, int y, Direction d, boolean raft, boolean water, int dyn, String moves, int f){
 		position = new int[2];
 		position[0] = x; position[1] = y;
 		direction = d;
@@ -39,19 +40,27 @@ public class GameState {
 		dynamite = dyn;
 		
 		movesSoFar = moves;
+		fMoves = f;
 	}
 	public GameState(int x, int y, Direction d){
 		position = new int[2];
 		position[0] = x; position[1] = y;
 		direction = d;
 		heuristic = 0;
+		hasRaft = false;
+		onWater = false;
+		dynamite = 0;
 		movesSoFar = "";
+		fMoves = 0;
 	}
 	public GameState(int x, int y, Direction d, String s){
 		position = new int[2];
 		position[0] = x; position[1] = y;
 		direction = d;
 		heuristic = 0;
+		hasRaft = false;
+		onWater = false;
+		dynamite = 0;
 		movesSoFar = s;
 	}
 	
@@ -64,7 +73,7 @@ public class GameState {
 	}
 	
 	public int getFValue(){
-		return heuristic+movesSoFar.length();
+		return heuristic+fMoves;
 	}
 	
 	public int getHValue(){
@@ -111,6 +120,22 @@ public class GameState {
 	
 	public GameState openDoor(){
 		return new GameState(position[0], position[1], direction, movesSoFar+"u");
+	}
+	
+	public boolean hasRaft(){
+		return hasRaft;
+	}
+	
+	public boolean onWater(){
+		return onWater;
+	}
+	
+	public int numDynamite(){
+		return dynamite;
+	}
+	
+	public int getFMoves(){
+		return fMoves;
 	}
 
 }
