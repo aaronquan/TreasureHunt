@@ -15,6 +15,7 @@ public class SmartHunter implements Ai {
 	private boolean hasAxe;
 	private boolean hasRaft;
 	private boolean onWater;
+	private int numDynamite;
 	
 	//searching
 	private Section discovered;
@@ -35,6 +36,7 @@ public class SmartHunter implements Ai {
 		hasAxe = false;
 		hasRaft = false;
 		onWater = false;
+		numDynamite = 0;
 		
 		discovered = new Section();
 		backtracker = new LinkedList<Integer[]>();
@@ -46,9 +48,23 @@ public class SmartHunter implements Ai {
 			map.addStartingView(view);
 			discovered.setTrue(0, 0);
 		}else{
+			//discovered.printSection(map);
 			updateUsingLastMove(view);
 		}
 		map.printMap();
+		SectionManager sm = map.getSectionManager();
+		int i = 0;
+		for(Section land: sm.getLandSections()){
+			System.out.println(i);
+			land.printSection(map);
+			i++;
+		}
+		i = 0;
+		for(Section water: sm.getWaterSections()){
+			System.out.println(i);
+			water.printSection(map);
+			i++;
+		}
 	}
 	
 	private void updateUsingLastMove(char[][] view){
@@ -82,14 +98,23 @@ public class SmartHunter implements Ai {
 				position[0]+=v[0]; position[1]+=v[1];
 				map.updateMap(view[0], currentDirection, position);	
 			}
-		}else if(lastMove == 'u'){
+		}else if(lastMove == 'u' && hasKey){
 			if(map.isCharAtPosition(cv[0], cv[1], '-')){
+				map.removeDoors(cv);
 				map.setCharAt(cv[0], cv[1], ' ');
+				map.addToLand(cv);
 			}
-		}else if(lastMove == 'c'){
+		}else if(lastMove == 'c' && hasAxe){
 			if(map.isCharAtPosition(cv[0], cv[1], 'T')){
 				map.setCharAt(cv[0], cv[1], ' ');
+				map.addToLand(cv);
 				hasRaft = true;
+			}
+		}else if(lastMove == 'b' && numDynamite > 0){
+			if(map.isCharAtPosition(cv[0], cv[1], '*')){
+				map.setCharAt(cv[0], cv[1], ' ');
+				map.addToLand(cv);
+				numDynamite--;
 			}
 		}
 	}
@@ -115,6 +140,8 @@ public class SmartHunter implements Ai {
 	private boolean evaluateMove(){
 		backing = false;
 		int[] goal = {0,0};
+		SectionManager sm = map.getSectionManager();
+		Section currentSection = sm.getSection(position[0], position[1], onWater);
 		if(hasTreasure){
 			goal[0] = 0; goal[1] = 0;
 			if(getCommands(goal)) return true;
@@ -126,12 +153,25 @@ public class SmartHunter implements Ai {
 		if(!hasKey && !map.getKeys().isEmpty()){
 			for(Integer[] k: map.getKeys()){
 				goal[0] = k[0]; goal[1] = k[1];
+				if(getCommands(goal)) return true;
+			}
+		}
+		if(hasKey && !map.getDoors().isEmpty()){
+			for(Integer[] k: map.getDoors()){
+				goal[0] = k[0]; goal[1] = k[1];
+				if(getCommands(goal)) return true;
 			}
 		}
 		if(!hasAxe && !map.getAxes().isEmpty()){
 			for(Integer[] a: map.getAxes()){
 				goal[0] = a[0]; goal[1] = a[1];
+				if(getCommands(goal)) return true;
 			}
+		}
+
+		
+		if(discovered.isEqual(currentSection)){
+			System.out.println("can't explore more!");
 		}
 		
 		//exploring

@@ -26,7 +26,9 @@ public class TreasureMap {
 	
 	private LinkedList<Integer[]> axes; //position of the axes
 	
-	private LinkedList<Integer[]> trees; //TO DO
+	private LinkedList<Integer[]> trees; //position of the trees
+	
+	private SectionManager sectionManager;
 	
 	
 	public TreasureMap(){
@@ -48,6 +50,8 @@ public class TreasureMap {
 		dynamite = new LinkedList<Integer[]>();
 		axes = new LinkedList<Integer[]>();
 		trees = new LinkedList<Integer[]>();
+		
+		sectionManager = new SectionManager();
 	}
 	
 	
@@ -61,11 +65,13 @@ public class TreasureMap {
 				int x = i - viewOffset; int y = j - viewOffset;
 				Integer[] p = {x,y};
 				addToList(p, view[j][i]);
+				addToSection(p, map[j+dimensions[1]][i+dimensions[0]]);
 			}
 		}
 		dimensions[2] = view.length;
 		dimensions[3] = view[0].length;
 	}
+
 	public void updateMap(char view[], Direction d, int[] pos){
 		int cx = centre+pos[0];
 		int cy = centre+pos[1];
@@ -81,7 +87,7 @@ public class TreasureMap {
 				int x = pos[0]+i-viewOffset; int y = pos[1]-viewOffset;
 				Integer[] p = {x,y};
 				addToList(p, view[i]);
-				
+				addToSection(p, view[i]);
 			}
 			//System.out.println("north");
 			break;
@@ -95,6 +101,7 @@ public class TreasureMap {
 				int x = pos[0]+viewOffset; int y = pos[1]+i-viewOffset;
 				Integer[] p = {x,y};
 				addToList(p, view[i]);
+				addToSection(p, view[i]);
 			}
 			//System.out.println("east");
 			break;
@@ -108,6 +115,7 @@ public class TreasureMap {
 				int x = pos[0]+i-viewOffset; int y = pos[1]+viewOffset;
 				Integer[] p = {x,y};
 				addToList(p, view[view.length-1-i]);
+				addToSection(p, view[view.length-1-i]);
 			}
 			//System.out.println("south");
 			break;
@@ -122,6 +130,7 @@ public class TreasureMap {
 				int x = pos[0]-viewOffset; int y = pos[1]+i-viewOffset;
 				Integer[] p = {x,y};
 				addToList(p, view[view.length-1-i]);
+				addToSection(p, view[view.length-1-i]);
 			}
 			//System.out.println("west");
 			break;
@@ -143,8 +152,31 @@ public class TreasureMap {
 			trees.add(p); break;
 		}
 	}
+	private void addToSection(Integer[] p, char c) {
+		//System.out.println(c);
+		if(c == ' ' || c == 'a' || c == 'k' || c == 'd' || c == '$' || c == '^'){
+			sectionManager.addLand(p);
+		}else if(c == '~'){
+			sectionManager.addWater(p);
+		}
+		sectionManager.setAllDimensions(dimensions);
+	}
+	public void addToLand(int[] p) {
+		Integer i[] = {p[0], p[1]};
+		sectionManager.addLand(i);
+		//sectionManager.setAllDimensions(dimensions);
+	}
+	public SectionManager getSectionManager(){
+		return sectionManager;
+	}
+	public int[] getDimensions(){
+		return dimensions;
+	}
 	public void setCharAt(int x, int y, char c){
 		map[y+centre][x+centre] = c;
+		if(c == '*' || c == 'T' || c == '-'){
+			
+		}
 	}
 	public char getCharAt(int x, int y){
 		return map[y+centre][x+centre];
@@ -155,6 +187,10 @@ public class TreasureMap {
 	public static int getMapSize(){
 		return mapSize;
 	}
+	/*
+	public static int getViewOffset(){
+		return viewOffset;
+	}*/
 	
 	public void printMap(){
 		System.out.println("Global Map");
