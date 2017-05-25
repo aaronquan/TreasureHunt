@@ -61,6 +61,8 @@ public class TreasureMap {
 	public void addStartingView(char view[][]){
 		assert(view.length > 0);
 		assert(view[0].length > 0);
+		dimensions[2] = view.length;
+		dimensions[3] = view[0].length;
 		for(int j = 0; j < view.length; j++){
 			for(int i = 0; i < view[0].length; i++){
 				map[j+dimensions[1]][i+dimensions[0]] = view[j][i];
@@ -71,8 +73,6 @@ public class TreasureMap {
 				addToSection(p, map[j+dimensions[1]][i+dimensions[0]]);
 			}
 		}
-		dimensions[2] = view.length;
-		dimensions[3] = view[0].length;
 	}
 
 	public void updateMap(char view[], Direction d, int[] pos){
@@ -162,15 +162,15 @@ public class TreasureMap {
 			viewArea.setDimensions(dimensions);
 		}
 		if(c == ' ' || c == 'a' || c == 'k' || c == 'd' || c == '$' || c == '^'){
-			sectionManager.addLand(p);
+			sectionManager.addLand(p, dimensions);
 		}else if(c == '~'){
-			sectionManager.addWater(p);
+			sectionManager.addWater(p, dimensions);
 		}
 		sectionManager.setAllDimensions(dimensions);
 	}
 	public void addToLand(int[] p) {
 		Integer i[] = {p[0], p[1]};
-		sectionManager.addLand(i);
+		sectionManager.addLand(i, dimensions);
 		//sectionManager.setAllDimensions(dimensions);
 	}
 	public SectionManager getSectionManager(){

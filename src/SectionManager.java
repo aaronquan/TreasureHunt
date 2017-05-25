@@ -9,23 +9,25 @@ public class SectionManager {
 		landSections = new LinkedList<Section>();
 		waterSections = new LinkedList<Section>();
 	}
-	public void addLand(Integer[] p){
+	public void addLand(Integer[] p, int[] dim){
 		if(landSections.isEmpty()){
 			Section n = new Section();
 			n.setTrue(p[0], p[1]);
+			n.setDimensions(dim);
 			landSections.add(n);
 		}else{
-			combineSections(p[0], p[1], landSections);
+			combineSections(p[0], p[1], landSections, dim);
 		}
 		
 	}
-	public void addWater(Integer[] p){
+	public void addWater(Integer[] p, int[] dim){
 		if(waterSections.isEmpty()){
 			Section n = new Section();
 			n.setTrue(p[0], p[1]);
+			n.setDimensions(dim);
 			waterSections.add(n);
 		}else{
-			combineSections(p[0], p[1], waterSections);
+			combineSections(p[0], p[1], waterSections, dim);
 		}
 	}
 	public LinkedList<Section> getLandSections(){
@@ -36,14 +38,16 @@ public class SectionManager {
 	}
 	
 	//combine sections on coordinates
-	public void combineSections(int x, int y, LinkedList<Section> sections){
+	public void combineSections(int x, int y, LinkedList<Section> sections, int[] dim){
 		boolean first = false;
 		Section toAddTo = null;
 		LinkedList<Integer> toDelete = new LinkedList<Integer>();
 		Integer i = 0;
 		for(Section s: sections){
+			//System.out.println(landSections);
 			if(!first){
-				if(s.setTrue(x, y)){
+				if(s.isNextTo(x, y)){
+					s.setValue(x, y, true);
 					first = true;
 					toAddTo = s;
 				}
@@ -55,9 +59,11 @@ public class SectionManager {
 			}
 			i += 1;
 		}
+		
 		if(toAddTo == null){
 			Section n = new Section();
 			n.setTrue(x, y);
+			n.setDimensions(dim);
 			sections.add(n);
 		}else{
 			for(Integer ind: toDelete){
