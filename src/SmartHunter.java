@@ -38,7 +38,7 @@ public class SmartHunter implements Ai {
 		onWater = false;
 		numDynamite = 0;
 		
-		beenTo = new Section();
+		beenTo = new Section(map.getDimensions());
 		backtracker = new LinkedList<Integer[]>();
 		backing = false;
 	}
@@ -52,8 +52,7 @@ public class SmartHunter implements Ai {
 			
 			updateUsingLastMove(view);
 		}
-		//int[] dim = map.getDimensions();
-		//beenTo.setDimensions(dim);
+		beenTo.setDimensions(map.getDimensions());
 		map.printMap();
 		
 		SectionManager sm = map.getSectionManager();
@@ -210,6 +209,8 @@ public class SmartHunter implements Ai {
 				//no cutting trees, should explore the water
 				//if water fully explored can cut more trees
 			}
+			if(numDynamite > 0){
+			}
 			System.out.println("can't explore more!");
 		}
 		
@@ -245,7 +246,7 @@ public class SmartHunter implements Ai {
 	//use goal and find commands to reach the goal
 	//false if no commands are gotten
 	private boolean getCommands(int[] goal){
-		Section visited = new Section();
+		Section visited = new Section(map.getDimensions());
 		Comparator<GameState> gsc = new GameStateComparator(false);
 		PriorityQueue<GameState> states = new PriorityQueue<GameState>(gsc);
 		GameState init = new GameState(position[0], position[1], currentDirection, hasRaft, onWater, 0);

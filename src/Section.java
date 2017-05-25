@@ -6,20 +6,28 @@ public class Section {
 	private static final int halfSize = size/2;
 	//private static final int viewOffset = TreasureMap.getViewOffset();
 	private boolean[][] section;
+	private boolean allFalse;
 	
 	private LinkedList<Section> adjacentSections;
 	
 	private int[] dimensions; //for optimisations later if required
 	//[topleft-x, topleft-y, width, height]
 	
-	public Section(){
+	public Section(int[] dim){
 		section = new boolean[size][size];
+		allFalse = true;
 		adjacentSections = new LinkedList<Section>();
 		dimensions = new int[4];
-		dimensions[0] = -1; // if -1 section is all false
-		dimensions[1] = -1;
-		dimensions[2] = 0;
-		dimensions[3] = 0;
+		dimensions[0] = dim[0];
+		dimensions[1] = dim[1];
+		dimensions[2] = dim[2];
+		dimensions[3] = dim[3];
+	}
+	public Section(){
+		section = new boolean[size][size];
+		allFalse = true;
+		adjacentSections = new LinkedList<Section>();
+		dimensions = new int[4];
 	}
 	
 	//avoid using this for is b is true
@@ -41,8 +49,9 @@ public class Section {
 	}
 	
 	public boolean setTrue(int x, int y){
-		if(dimensions[0] == -1 && dimensions[1] == -1){
+		if(allFalse){
 			section[y+halfSize][x+halfSize] = true;
+			allFalse = false;
 			//dimensions[0] = x+halfSize; dimensions[1] = y+halfSize; dimensions[2] = 1; dimensions[3] = 1;
 		}
 		if(isNextTo(x,y)){

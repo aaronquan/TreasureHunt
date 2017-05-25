@@ -54,7 +54,7 @@ public class TreasureMap {
 		trees = new LinkedList<Integer[]>();
 		
 		sectionManager = new SectionManager();
-		viewArea = new Section();
+		viewArea = new Section(dimensions);
 	}
 	
 	

@@ -11,9 +11,8 @@ public class SectionManager {
 	}
 	public void addLand(Integer[] p, int[] dim){
 		if(landSections.isEmpty()){
-			Section n = new Section();
+			Section n = new Section(dim);
 			n.setTrue(p[0], p[1]);
-			n.setDimensions(dim);
 			landSections.add(n);
 		}else{
 			combineSections(p[0], p[1], landSections, dim);
@@ -22,9 +21,8 @@ public class SectionManager {
 	}
 	public void addWater(Integer[] p, int[] dim){
 		if(waterSections.isEmpty()){
-			Section n = new Section();
+			Section n = new Section(dim);
 			n.setTrue(p[0], p[1]);
-			n.setDimensions(dim);
 			waterSections.add(n);
 		}else{
 			combineSections(p[0], p[1], waterSections, dim);
@@ -61,13 +59,11 @@ public class SectionManager {
 		}
 		
 		if(toAddTo == null){
-			Section n = new Section();
+			Section n = new Section(dim);
 			n.setTrue(x, y);
-			n.setDimensions(dim);
 			sections.add(n);
 		}else{
 			for(Integer ind: toDelete){
-				System.out.println("hello?");
 				sections.remove((int)ind);
 			}
 		}
