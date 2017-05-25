@@ -162,14 +162,14 @@ public class SmartHunter implements Ai {
 			if(getCommands(goal)) return true;
 		}
 		for(Integer[] m: map.getTreasures()){
-			if(currentSection.isNextTo(m[0], m[1])){
+			if(currentSection.getValue(m[0], m[1])){
 				goal[0] = m[0]; goal[1] = m[1];
 				if(getCommands(goal)) return true;
 			}
 		}
 		if(!hasKey && !map.getKeys().isEmpty()){
 			for(Integer[] k: map.getKeys()){
-				if(currentSection.isNextTo(k[0], k[1])){
+				if(currentSection.getValue(k[0], k[1])){
 					goal[0] = k[0]; goal[1] = k[1];
 					if(getCommands(goal)) return true;
 				}
@@ -185,7 +185,7 @@ public class SmartHunter implements Ai {
 		}
 		if(!hasAxe && !map.getAxes().isEmpty()){
 			for(Integer[] a: map.getAxes()){
-				if(currentSection.isNextTo(a[0], a[1])){
+				if(currentSection.getValue(a[0], a[1])){
 					goal[0] = a[0]; goal[1] = a[1];
 					if(getCommands(goal)) return true;
 				}
@@ -199,7 +199,7 @@ public class SmartHunter implements Ai {
 				}
 			}
 		}
-
+		
 		
 		if(beenTo.isEqual(currentSection)){
 			//can cut down trees or blast walls or use raft to explore other sections
@@ -235,6 +235,10 @@ public class SmartHunter implements Ai {
 			goal[0] = back[0]; goal[1] = back[1];
 			if (backing = getCommands(goal)) return true;
 		}
+		
+		//find goal out of all positions in the current section which gives the best information
+		
+		
 		return false;
 	}
 	
@@ -318,6 +322,17 @@ public class SmartHunter implements Ai {
 		return null;
 		
 	}
+	/*
+	private int numTreesNextToSection(Section s){
+		int i = 0;
+		for(Integer[] t: map.getTrees()){
+			if(s.isNextTo(t[0], t[1])){
+				i++;
+			}
+		}
+		return i;
+	}
+	*/
 }
 
 
