@@ -16,27 +16,6 @@ public class SectionManager {
 			landSections.add(n);
 		}else{
 			combineSections(p[0], p[1], landSections);
-			/*
-			boolean first = false;
-			Section toAddTo = null;
-			LinkedList<Integer> toDelete = new LinkedList<Integer>();
-			Integer i = 0;
-			for(Section s: landSections){
-				if(!first){
-					if(s.setTrue(p[0], p[1])){
-						first = true;
-						toAddTo = s;
-					}
-				}else{
-					toAddTo.add(s);
-					toDelete.addFirst(i);
-				}
-				i += 1;
-			}
-			for(Integer ind: toDelete){
-				landSections.remove(ind);
-			}
-			*/
 		}
 		
 	}

@@ -25,6 +25,7 @@ public class Section {
 	//avoid using this for is b is true
 	//not fully complete
 	public void setValue(int x, int y, boolean b){
+		/*
 		if(x+halfSize < dimensions[0]){
 			dimensions[0] -= 1;
 			dimensions[2] += 1;
@@ -35,14 +36,14 @@ public class Section {
 			dimensions[2] += 1;
 		}else if(y+halfSize >= dimensions[1]+dimensions[3]){
 			dimensions[3] += 1;
-		}
+		}*/
 		section[y+halfSize][x+halfSize] = b;
 	}
 	
 	public boolean setTrue(int x, int y){
 		if(dimensions[0] == -1 && dimensions[1] == -1){
 			section[y+halfSize][x+halfSize] = true;
-			/*dimensions[0] = x+halfSize; dimensions[1] = y+halfSize; dimensions[2] = 1; dimensions[3] = 1;*/
+			//dimensions[0] = x+halfSize; dimensions[1] = y+halfSize; dimensions[2] = 1; dimensions[3] = 1;
 		}
 		if(isNextTo(x,y)){
 			section[y+halfSize][x+halfSize] = true;
@@ -151,6 +152,9 @@ public class Section {
 		return dimensions;
 	}
 	public void setDimensions(int[] dim){
-		dimensions = dim;
+		for(int i = 0; i < dim.length; i++){
+			dimensions[i] = dim[i];
+		}
+		//dimensions = dim;
 	}
 }

@@ -30,6 +30,8 @@ public class TreasureMap {
 	
 	private SectionManager sectionManager;
 	
+	private Section viewArea; //the area that has been discovered
+	
 	
 	public TreasureMap(){
 		map = new char[mapSize][mapSize];
@@ -52,6 +54,7 @@ public class TreasureMap {
 		trees = new LinkedList<Integer[]>();
 		
 		sectionManager = new SectionManager();
+		viewArea = new Section();
 	}
 	
 	
@@ -154,6 +157,10 @@ public class TreasureMap {
 	}
 	private void addToSection(Integer[] p, char c) {
 		//System.out.println(c);
+		if(c != '.'){
+			viewArea.setValue(p[0], p[1], true);
+			viewArea.setDimensions(dimensions);
+		}
 		if(c == ' ' || c == 'a' || c == 'k' || c == 'd' || c == '$' || c == '^'){
 			sectionManager.addLand(p);
 		}else if(c == '~'){
@@ -304,6 +311,10 @@ public class TreasureMap {
 		for(int i = 0; i < trees.size(); i++){
 			if(trees.get(i)[0] == p[0] && trees.get(i)[1] == p[1]) trees.remove(i);
 		}
+	}
+	
+	public Section getViewArea(){
+		return viewArea;
 	}
 	
 	
