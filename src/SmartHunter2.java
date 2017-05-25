@@ -1,7 +1,7 @@
 import java.util.*;
 
 
-public class SmartHunter implements Ai {
+public class SmartHunter2 implements Ai {
 	private int[] position; //starting at 0,0
 	private int moves;
 	private Direction currentDirection; //starting from north
@@ -23,7 +23,7 @@ public class SmartHunter implements Ai {
 	private boolean backing;
 	
 	
-	public SmartHunter(){
+	public SmartHunter2(){
 		position = new int[2];
 		position[0] = 0; position[1] = 0;
 		moves = 0;
@@ -324,17 +324,37 @@ public class SmartHunter implements Ai {
 		return null;
 		
 	}
-	/*
-	private int numTreesNextToSection(Section s){
-		int i = 0;
-		for(Integer[] t: map.getTrees()){
-			if(s.isNextTo(t[0], t[1])){
-				i++;
+	private LinkedList<Section> reachableLandSections(){
+		SectionManager sm = map.getSectionManager();
+		Section currentSection = sm.getSection(position[0], position[1], onWater);
+		
+		LinkedList<Section> reachable = new LinkedList<Section>();
+		LinkedList<Section> landSections = sm.getLandSections();
+		
+		for(Section s: landSections){
+			if(onWater){
+				if(currentSection.sectionNextTo(s)){
+					reachable.add(s);
+					break;
+				}
+			}else{
+				
 			}
 		}
-		return i;
+		
+		return reachable;
 	}
-	*/
+	private LinkedList<Section> reachableWaterSections(){
+		LinkedList<Section> reachable = new LinkedList<Section>();
+		SectionManager sm = map.getSectionManager();
+		Section currentSection = sm.getSection(position[0], position[1], onWater);
+		LinkedList<Section> waterSections = sm.getWaterSections();
+		if(hasRaft){
+			for(Section s: waterSections){
+				if(currentSection.sectionNextTo(s)) reachable.add(s);
+			}
+		}
+		
+		return reachable;
+	}
 }
-
-
