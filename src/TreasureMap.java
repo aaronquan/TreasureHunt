@@ -28,6 +28,8 @@ public class TreasureMap {
 	
 	private LinkedList<Integer[]> trees; //position of the trees
 	
+	private LinkedList<Integer[]> walls; // position of the walls
+	
 	private SectionManager sectionManager;
 	
 	private Section viewArea; //the area that has been discovered
@@ -52,6 +54,7 @@ public class TreasureMap {
 		dynamite = new LinkedList<Integer[]>();
 		axes = new LinkedList<Integer[]>();
 		trees = new LinkedList<Integer[]>();
+		walls = new LinkedList<Integer[]>();
 		
 		sectionManager = new SectionManager();
 		viewArea = new Section(dimensions);
@@ -153,6 +156,8 @@ public class TreasureMap {
 			axes.add(p); break;
 		case 'T':
 			trees.add(p); break;
+		case '*':
+			walls.add(p); break;
 		}
 	}
 	private void addToSection(Integer[] p, char c) {
@@ -302,6 +307,9 @@ public class TreasureMap {
 	}
 	public LinkedList<Integer[]> getTrees(){
 		return trees;
+	}
+	public LinkedList<Integer[]> getWalls(){
+		return walls;
 	}
 	
 	public void removeDoors(int[] p){
