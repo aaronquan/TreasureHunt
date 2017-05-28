@@ -5,7 +5,7 @@ public class ViGoal implements Ai {
 	private int[] position; //starting at 0,0
 	private int moves;
 	private Direction currentDirection; //starting from north
-	private TreasureMap map;
+	private VTreasureMap map;
 	
 	private String commandBuffer;
 	private char lastMove;
@@ -18,7 +18,7 @@ public class ViGoal implements Ai {
 	private int numDynamite;
 	
 	//searching
-	private Section beenTo;
+	private VSection beenTo;
 	private LinkedList<Integer[]> backtracker;
 	private boolean backing;
 	
@@ -28,7 +28,7 @@ public class ViGoal implements Ai {
 		position[0] = 0; position[1] = 0;
 		moves = 0;
 		currentDirection = Direction.NORTH;
-		map = new TreasureMap();
+		map = new VTreasureMap();
 		commandBuffer = "";
 		
 		hasTreasure = false;
@@ -38,7 +38,7 @@ public class ViGoal implements Ai {
 		onWater = false;
 		numDynamite = 0;
 		
-		beenTo = new Section(map.getDimensions());
+		beenTo = new VSection(map.getDimensions());
 		backtracker = new LinkedList<Integer[]>();
 		backing = false;
 	}
@@ -46,7 +46,7 @@ public class ViGoal implements Ai {
 	private void update(char view[][]){
 		if(moves == 0){
 			map.addStartingView(view);
-			beenTo.setTrue(0, 0);
+			beenTo.setTrue(0, 0, ' ');
 		}else{
 			//discovered.printSection(map);
 			
@@ -55,15 +55,15 @@ public class ViGoal implements Ai {
 		beenTo.setDimensions(map.getDimensions());
 		map.printMap();
 		
-		SectionManager sm = map.getSectionManager();
+		VSectionManager sm = map.getSectionManager();
 		int i = 0;
-		for(Section land: sm.getLandSections()){
+		for(VSection land: sm.getLandSections()){
 			System.out.println(i);
 			land.printSection(map);
 			i++;
 		}
 		i = 0;
-		for(Section water: sm.getWaterSections()){
+		for(VSection water: sm.getWaterSections()){
 			System.out.println(i);
 			water.printSection(map);
 			i++;
@@ -100,13 +100,13 @@ public class ViGoal implements Ai {
 			if(!map.isBlockedAt(cv[0], cv[1]) || map.isCharAtPosition(cv[0], cv[1], '~')){
 				//dont have to do the case where hasRaft is false and water since game is lost
 				if(map.isCharAtPosition(cv[0], cv[1], '~')){
+					beenTo.setTrue(cv[0], cv[1], '~');
 					onWater = true;
-					if(hasRaft) hasRaft = false;
 				}else{
+					beenTo.setTrue(cv[0], cv[1], '~');
 					onWater = false;
 				}
 				
-				beenTo.setTrue(cv[0], cv[1]);
 				if(!backing){
 					Integer bt[] = {position[0], position[1]};
 					backtracker.add(bt);
@@ -119,20 +119,20 @@ public class ViGoal implements Ai {
 			if(map.isCharAtPosition(cv[0], cv[1], '-')){
 				map.removeDoors(cv);
 				map.setCharAt(cv[0], cv[1], ' ');
-				map.addToLand(cv);
+				map.addToLand(cv, ' ');
 			}
 		}else if(lastMove == 'c' && hasAxe){
 			if(map.isCharAtPosition(cv[0], cv[1], 'T')){
 				map.removeTrees(cv);
 				map.setCharAt(cv[0], cv[1], ' ');
-				map.addToLand(cv);
+				map.addToLand(cv, ' ');
 				if(!onWater) hasRaft = true;
 			}
 		}else if(lastMove == 'b' && numDynamite > 0){
 			if(map.isCharAtPosition(cv[0], cv[1], '*')){
 				map.removeDynamite(cv);
 				map.setCharAt(cv[0], cv[1], ' ');
-				map.addToLand(cv);
+				map.addToLand(cv, ' ');
 				numDynamite--;
 			}
 		}
@@ -159,8 +159,8 @@ public class ViGoal implements Ai {
 	private boolean evaluateMove(){
 		backing = false;
 		int[] goal = {0,0};
-		SectionManager sm = map.getSectionManager();
-		Section currentSection = sm.getSection(position[0], position[1], onWater);
+		VSectionManager sm = map.getSectionManager();
+		VSection currentSection = sm.getSection(position[0], position[1], onWater);
 		if(hasTreasure){
 			goal[0] = 0; goal[1] = 0;
 			if(getCommands(goal)) return true;
