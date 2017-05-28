@@ -98,7 +98,7 @@ public class Section {
 		for(int j = dim[1]-halfSize; j < dim[1]+dim[3]-halfSize; j++){
 			for(int i = dim[0]-halfSize; i < dim[0]+dim[2]-halfSize; i++){
 				if(s.getValue(i, j)){
-					if(getValue(i,j)) return false;
+					if(!getValue(i,j)) return false;
 				}
 			}
 		}
@@ -127,6 +127,9 @@ public class Section {
 		else if(getValue(x,y+1)) return true;
 		else if(getValue(x,y-1)) return true;
 		return false;
+	}
+	public boolean allNextTo(int x, int y){
+		return getValue(x+1,y) && getValue(x-1,y) && getValue(x,y+1) && getValue(x,y-1);
 	}
 	public boolean sectionNextTo(Section s){
 		for(int j = dimensions[1]-halfSize; j < dimensions[1]+dimensions[3]-halfSize; j++){
@@ -175,5 +178,41 @@ public class Section {
 			dimensions[i] = dim[i];
 		}
 		//dimensions = dim;
+	}
+	public LinkedList<Integer[]> getOutline(){
+		LinkedList<Integer[]> outline = new LinkedList<Integer[]>();
+		for(int j = dimensions[1]-halfSize; j < dimensions[1]+dimensions[3]-halfSize; j++){
+			for(int i = dimensions[0]-halfSize; i < dimensions[0]+dimensions[2]-halfSize; i++){
+				if(getValue(i, j)){
+					if(!allNextTo(i, j)){
+						Integer[] pos = {i,j};
+						outline.add(pos);
+					}
+				}
+			}
+		}
+		return outline;
+	}
+	public LinkedList<Integer[]> getPositions(){
+		LinkedList<Integer[]> positions = new LinkedList<Integer[]>();
+		for(int j = dimensions[1]-halfSize; j < dimensions[1]+dimensions[3]-halfSize; j++){
+			for(int i = dimensions[0]-halfSize; i < dimensions[0]+dimensions[2]-halfSize; i++){
+				if(getValue(i, j)){
+					Integer[] pos = {i,j};
+					positions.add(pos);
+				}
+			}
+		}
+		return positions;
+	}
+	public Section copy(){
+		Section copy = new Section();
+		for(int j = dimensions[1]-halfSize; j < dimensions[1]+dimensions[3]-halfSize; j++){
+			for(int i = dimensions[0]-halfSize; i < dimensions[0]+dimensions[2]-halfSize; i++){
+				copy.setValue(i, j, getValue(i,j));
+			}
+		}
+		copy.setDimensions(dimensions);
+		return copy;
 	}
 }

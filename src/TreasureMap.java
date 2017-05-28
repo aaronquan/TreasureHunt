@@ -66,7 +66,7 @@ public class TreasureMap {
 		for(int j = 0; j < view.length; j++){
 			for(int i = 0; i < view[0].length; i++){
 				map[j+dimensions[1]][i+dimensions[0]] = view[j][i];
-				if(i == 2 && j == 2) map[j+dimensions[1]][i+dimensions[0]] = '^';
+				if(i == 2 && j == 2) map[j+dimensions[1]][i+dimensions[0]] = ' ';
 				int x = i - viewOffset; int y = j - viewOffset;
 				Integer[] p = {x,y};
 				addToList(p, view[j][i]);
@@ -253,6 +253,13 @@ public class TreasureMap {
 		int[] v = d.getVector1();
 		char c = d.getDirectionalChar();
 		map[centre+pos[1]][centre+pos[0]] = ' ';
+		map[centre+pos[1]+v[1]][centre+pos[0]+v[0]] = c;
+	}
+	public void movePlayer(int[] pos, Direction d, boolean onWater){
+		int[] v = d.getVector1();
+		char c = d.getDirectionalChar();
+		map[centre+pos[1]][centre+pos[0]] = ' ';
+		if(onWater) map[centre+pos[1]][centre+pos[0]] = '~';
 		map[centre+pos[1]+v[1]][centre+pos[0]+v[0]] = c;
 	}
 	public void movePlayer(int[] pos){

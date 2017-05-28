@@ -54,7 +54,7 @@ public class SmartHunter2 implements Ai {
 		}
 		beenTo.setDimensions(map.getDimensions());
 		map.printMap();
-		
+		/*
 		SectionManager sm = map.getSectionManager();
 		int i = 0;
 		for(Section land: sm.getLandSections()){
@@ -68,6 +68,7 @@ public class SmartHunter2 implements Ai {
 			water.printSection(map);
 			i++;
 		}
+		*/
 	}
 	
 	private void updateUsingLastMove(char[][] view){
@@ -95,18 +96,20 @@ public class SmartHunter2 implements Ai {
 			if(!map.isBlockedAt(cv[0], cv[1]) || map.isCharAtPosition(cv[0], cv[1], '~')){
 				//dont have to do the case where hasRaft is false and water since game is lost
 				if(map.isCharAtPosition(cv[0], cv[1], '~')){
+					System.out.println("water!!!");
+					map.movePlayer(position, currentDirection, onWater);
 					onWater = true;
 					if(hasRaft) hasRaft = false;
 				}else{
+					map.movePlayer(position, currentDirection, onWater);
 					onWater = false;
 				}
-				
 				beenTo.setTrue(cv[0], cv[1]);
 				if(!backing){
 					Integer bt[] = {position[0], position[1]};
 					backtracker.add(bt);
 				}
-				map.movePlayer(position, currentDirection);
+				//map.movePlayer(position, currentDirection);
 				position[0]+=v[0]; position[1]+=v[1];
 				map.updateMap(view[0], currentDirection, position);	
 			}
@@ -126,6 +129,11 @@ public class SmartHunter2 implements Ai {
 		}else if(lastMove == 'b' && numDynamite > 0){
 			if(map.isCharAtPosition(cv[0], cv[1], '*')){
 				map.removeDynamite(cv);
+				map.setCharAt(cv[0], cv[1], ' ');
+				map.addToLand(cv);
+				numDynamite--;
+			}else if(map.isCharAtPosition(cv[0], cv[1], 'T')){
+				map.removeTrees(cv);
 				map.setCharAt(cv[0], cv[1], ' ');
 				map.addToLand(cv);
 				numDynamite--;
@@ -162,6 +170,7 @@ public class SmartHunter2 implements Ai {
 		}
 		for(Integer[] m: map.getTreasures()){
 			if(currentSection.getValue(m[0], m[1])){
+				System.out.println("can reach treasure?");
 				goal[0] = m[0]; goal[1] = m[1];
 				if(getCommands(goal)) return true;
 			}
@@ -190,7 +199,7 @@ public class SmartHunter2 implements Ai {
 				}
 			}
 		}
-		if(!hasRaft && hasAxe && !map.getTrees().isEmpty()){
+		if(!onWater && !hasRaft && hasAxe && !map.getTrees().isEmpty()){
 			for(Integer[] t: map.getTrees()){
 				if(currentSection.isNextTo(t[0], t[1])){
 					goal[0] = t[0]; goal[1] = t[1];
@@ -198,21 +207,56 @@ public class SmartHunter2 implements Ai {
 				}
 			}
 		}
-		
-		
-		if(beenTo.isEqual(currentSection)){
-			//can cut down trees or blast walls or use raft to explore other sections
-			if(!hasRaft){
-				//can cut down a tree
-				
-			}else{
-				//no cutting trees, should explore the water
-				//if water fully explored can cut more trees
+		if(!onWater){
+			LinkedList<Section> w = reachableWaterSections();
+			for(Section s: w){
+				s.printSection(map);
 			}
-			if(numDynamite > 0){
-				
-			}
+		}
+		if(beenTo.isSubset(currentSection)){
 			System.out.println("can't explore more!");
+			//can cut down trees or blast walls or use raft to explore other sections
+			if(!onWater){
+				//on land
+				if(hasRaft){
+					LinkedList<Section> w = reachableWaterSections();
+					for(Section s: w){
+						if(beenTo.isSubset(s)) continue;
+						Integer[] getGoal = getClosestFromCurrentPosition(s);
+						goal[0] = getGoal[0]; goal[1] = getGoal[1];
+						if(getCommands(goal)) return true;
+					}
+				}else{
+					LinkedList<Section> l = reachableLandSections();
+					for(Section s: l){
+						s.printSection(map);
+						if(beenTo.isSubset(s)) continue;
+						Integer[] getGoal = getClosestFromCurrentPosition(s);
+						goal[0] = getGoal[0]; goal[1] = getGoal[1];
+						System.out.println(goal[0]+" "+goal[1]);
+						if(getCommands(goal)) return true;
+					}
+				}
+			}else{
+				//on water
+				LinkedList<Section> l = reachableLandSections();
+				for(Section s: l){
+					s.printSection(map);
+					if(beenTo.isSubset(s)) continue;
+					boolean hasTree = false;
+					for(Integer[] tree: map.getTrees()){
+						if(s.isNextTo(tree[0], tree[1])){
+							hasTree = true; 
+							break;
+						}
+					}
+					if(!hasTree) continue;
+					Integer[] getGoal = getClosestFromCurrentPosition(s);
+					goal[0] = getGoal[0]; goal[1] = getGoal[1];
+					if(getCommands(goal)) return true;
+				}
+				
+			}
 		}
 		
 		//exploring
@@ -222,10 +266,18 @@ public class SmartHunter2 implements Ai {
 		GameState[] neighbours = current.generateNeighbours();
 		for(GameState gs: neighbours){
 			int[] pos = gs.getPosition();
-			if(!map.isBlockedAt(pos[0], pos[1]) && !beenTo.getValue(pos[0], pos[1])){
-				int h = map.getNumUnknowns(pos, gs.getDirection());
-				gs.setHeuristic(-h);
-				states.add(gs);
+			if(!onWater){
+				if(!map.isBlockedAt(pos[0], pos[1]) && !beenTo.getValue(pos[0], pos[1])){
+					int h = map.getNumUnknowns(pos, gs.getDirection());
+					gs.setHeuristic(-h);
+					states.add(gs);
+				}
+			}else{
+				if(map.isCharAtPosition(pos[0], pos[1], '~') && !beenTo.getValue(pos[0], pos[1])){
+					int h = map.getNumUnknowns(pos, gs.getDirection());
+					gs.setHeuristic(-h);
+					states.add(gs);
+				}
 			}
 		}
 		if(!states.isEmpty()){
@@ -250,7 +302,7 @@ public class SmartHunter2 implements Ai {
 		Section visited = new Section(map.getDimensions());
 		Comparator<GameState> gsc = new GameStateComparator(false);
 		PriorityQueue<GameState> states = new PriorityQueue<GameState>(gsc);
-		GameState init = new GameState(position[0], position[1], currentDirection, hasRaft, onWater, 0);
+		GameState init = new GameState(position[0], position[1], currentDirection, hasRaft, onWater, numDynamite);
 		visited.setTrue(position[0], position[1]);
 		states.add(init);
 		while(!states.isEmpty()){
@@ -304,20 +356,22 @@ public class SmartHunter2 implements Ai {
 		if(!map.isBlockedAt(cb[0], cb[1])){
 			return new GameState(cb[0], cb[1], d, gsRaft, gsWater, gsDynamite, soFar+move+"f", gsForward1);
 		}else if(map.isCharAtPosition(cb[0], cb[1], '-') && hasKey){
-			return new GameState(cb[0], cb[1], d, gsRaft, gsWater, gsDynamite, soFar+move+"uf", gsForward1);
+			return new GameState(cb[0], cb[1], d, gsRaft, false, gsDynamite, soFar+move+"uf", gsForward1);
 		}else if(map.isCharAtPosition(cb[0], cb[1], 'T') && hasAxe){
 			if(gsWater){
-				return new GameState(cb[0], cb[1], d, false, gsWater, gsDynamite, soFar+move+"cf", gsForward1);
+				return new GameState(cb[0], cb[1], d, false, false, gsDynamite, soFar+move+"cf", gsForward1);
 			}else{
-				return new GameState(cb[0], cb[1], d, true, gsWater, gsDynamite, soFar+move+"cf", gsForward1);
+				return new GameState(cb[0], cb[1], d, true, false, gsDynamite, soFar+move+"cf", gsForward1);
 			}
+		}else if(map.isCharAtPosition(cb[0], cb[1], 'T') && gsDynamite > 0){
+			return new GameState(cb[0], cb[1], d, gsRaft, false, gsDynamite-1, soFar+move+"bf", gsForward1);
 		}else if(map.isCharAtPosition(cb[0], cb[1], '*') && gsDynamite > 0){
-			return new GameState(cb[0], cb[1], d, gsRaft, gsWater, gsDynamite-1, soFar+move+"bf", gsForward1);
+			return new GameState(cb[0], cb[1], d, gsRaft, false, gsDynamite-1, soFar+move+"bf", gsForward1);
 		}else if(map.isCharAtPosition(cb[0], cb[1], '~')){
 			if(!gsWater && gsRaft){
 				return new GameState(cb[0], cb[1], d, false, true, gsDynamite, soFar+move+"f", gsForward1);
 			}else if(gsWater){
-				return new GameState(cb[0], cb[1], d, gsRaft, false, gsDynamite, soFar+move+"f", gsForward1);
+				return new GameState(cb[0], cb[1], d, gsRaft, true, gsDynamite, soFar+move+"f", gsForward1);
 			}
 		}
 		
@@ -332,13 +386,45 @@ public class SmartHunter2 implements Ai {
 		LinkedList<Section> landSections = sm.getLandSections();
 		
 		for(Section s: landSections){
+			/*
 			if(onWater){
 				if(currentSection.sectionNextTo(s)){
 					reachable.add(s);
-					break;
 				}
 			}else{
-				
+			*/
+			if(s.isEqual(currentSection)) continue;
+			//s.printSection(map);
+			Section examined = s.copy();
+			LinkedList<GameState> states = new LinkedList<GameState>();
+			LinkedList<Integer[]> squares = s.getOutline();
+			for(Integer[] sq: squares){
+				System.out.println(sq[0]+" "+sq[1]);
+				states.add(new GameState(sq[0], sq[1], currentDirection, hasRaft, onWater, numDynamite));
+			}
+			while(!states.isEmpty()){
+				GameState curr = states.removeFirst();
+				int[] cp = curr.getPosition();
+				Integer[] u = {cp[0], cp[1]-1}; Integer[] d = {cp[0], cp[1]+1};
+				Integer[] l = {cp[0]-1, cp[1]}; Integer[] r = {cp[0]+1, cp[1]};
+				LinkedList<Integer[]> directions = new LinkedList<Integer[]>();
+				directions.add(u); directions.add(d); directions.add(r); directions.add(l);
+				int dyn = curr.numDynamite();
+				for(Integer[] pos: directions){
+					if (examined.getValue(pos[0], pos[1])) continue;
+					examined.setTrue(pos[0], pos[1]);
+					if(currentSection.getValue(pos[0], pos[1])) reachable.add(s);
+					if(map.isCharAtPosition(pos[0], pos[1], 'T') && hasAxe){
+						states.addFirst(new GameState(pos[0], pos[1], currentDirection, hasRaft, onWater, dyn));
+					}else if(map.isCharAtPosition(pos[0], pos[1], 'T') && dyn > 0){
+						states.addFirst(new GameState(pos[0], pos[1], currentDirection, hasRaft, onWater, dyn-1));
+					}else if(map.isCharAtPosition(pos[0], pos[1], '-') && hasKey){
+						states.addFirst(new GameState(pos[0], pos[1], currentDirection, hasRaft, onWater, dyn));
+					}else if(map.isCharAtPosition(pos[0], pos[1], '*') && dyn > 0){
+						states.addFirst(new GameState(pos[0], pos[1], currentDirection, hasRaft, onWater, dyn-1));
+					}
+				}
+				//}
 			}
 		}
 		
@@ -356,5 +442,19 @@ public class SmartHunter2 implements Ai {
 		}
 		
 		return reachable;
+	}
+	private Integer[] getClosestFromCurrentPosition(Section s){
+		LinkedList<Integer[]> outline = s.getOutline();
+		int min = 80*80; int index = 0; int minIndex = -1;
+		for(Integer[] pos: outline){
+			if(Math.abs(pos[0]-position[0])+Math.abs(pos[1]-position[1])<min){
+				min = Math.abs(pos[0]-position[0])+Math.abs(pos[1]-position[1]);
+				minIndex = index; 
+			}
+			index++;
+		}
+		if(minIndex == -1) return null;
+		return outline.get(minIndex);
+		
 	}
 }

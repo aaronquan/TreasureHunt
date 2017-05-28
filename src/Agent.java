@@ -76,7 +76,7 @@ public class Agent {
       int ch;
       int i,j;
       
-      agent.ai = new SmartHunter(); //change ai here
+      agent.ai = new SmartHunter2(); //change ai here
       //agent.ai = new MultiGoal();
       //agent.ai = new MultiGoalAction();
       //agent.ai = new ViGoal();
