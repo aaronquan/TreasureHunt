@@ -179,6 +179,8 @@ public class Section {
 		}
 		//dimensions = dim;
 	}
+	
+	//the positions of the edges of the section
 	public LinkedList<Integer[]> getOutline(){
 		LinkedList<Integer[]> outline = new LinkedList<Integer[]>();
 		for(int j = dimensions[1]-halfSize; j < dimensions[1]+dimensions[3]-halfSize; j++){

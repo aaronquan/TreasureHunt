@@ -1,5 +1,38 @@
 import java.util.*;
+/*
+Briefly describe how your program works, including any algorithms and data structures employed, and explain any design decisions you made along the way.
 
+How It Works
+The AI works with three steps, updating the data structures, finding goal positions and finding the moves to get to the goal.
+In the update phase, the ai uses its previous move as well as the data found from view to update the map and its gamestate (position, direction etc.).
+Finding the goal (evaluateMove function) is the decision making step of the ai. Here we evaluate the position.
+Final step is getting the sequence of moves to reach the goal to store in the commandbuffer (getCommands function).
+
+Data Structures
+GameState - a hypothetical state of the game
+TreasureMap - holds the map of the world in a 160x160 array and the objects in the map
+Section - denotes a part of the map (main decision making tool). 
+e.g. if the treasure is in a neighbouring section blocked by a door and we have a key we can get the treasure!
+
+Design Decisions
+
+The code uses an ai interface for the Agent AI which has been refined over many times to our final copy. We started with an only moving ai and slowly started adding extra logic to each ai version (other ai's not included in submission).
+ We first start of with the global map class called TreasureMap. It populates a 160x160 array as we explore around with the agent, identifying the items around the map and placing on it accordingly. We start off with the agent staring at
+north, and use the Direction.java class in order to help with positioning the Agent. In order to make decisions on the map, we "sectioned" off the map, in order to help the ai
+decide on what to do. A section denotes an area of connected land and water. So a section will always contain the current
+path we've discovered so far, and all other disjointed land/water sections within the global map. We have a gamestate which records the gamestate for each foreseeable move, 
+i.e going north/east/west/south. Our AI works by first seeing if there exist something we can grab within our section, if so it will path straight to it, otherwise it would
+create a state for each direction and will go towards the most unknowns in that state (the heuristic). For doors, we unlock as there is no consequences (i.e no losing keys) however
+with going on water and using dynamite, it was more harder to implement as we lose the item if we don't choose the right thing (its not perfectly implemented).
+
+Reflection
+Actually quite disappointed with the end result. Found it difficult to evaluate decisions such as finding the best wall to blow up with the data we had.
+Thought that the initial design of the ai was good. Got quite messy afterwards. Not sure if the sections class is really helpful or easy to code with.
+Seemed like a logical decision at the time but turn out too difficult to use properly (goal was to improve performance). Performance in the end was never the issue.
+Thus should have done more searching. 
+Could have created a graph of sections, but was worried of the difficulty maintaining the data structures, as maintaining sections was already iffy.
+ 
+*/
 
 public class SmartHunter2 implements Ai {
 	private int[] position; //starting at 0,0
@@ -22,7 +55,7 @@ public class SmartHunter2 implements Ai {
 	private LinkedList<Integer[]> backtracker;
 	private boolean backing;
 	
-	private LinkedList<Integer[]> futureGoals;
+	//private LinkedList<Integer[]> futureGoals;
 	
 	
 	public SmartHunter2(){
@@ -40,7 +73,7 @@ public class SmartHunter2 implements Ai {
 		onWater = false;
 		numDynamite = 0;
 		
-		beenTo = new Section(map.getDimensions());
+		beenTo = new Section(map.getDimensions()); //all the positions we have already been
 		backtracker = new LinkedList<Integer[]>();
 		backing = false;
 	}
@@ -55,24 +88,6 @@ public class SmartHunter2 implements Ai {
 			updateUsingLastMove(view);
 		}
 		beenTo.setDimensions(map.getDimensions());
-		//System.out.println(numDynamite);
-		//map.printMap();
-		/*
-		SectionManager sm = map.getSectionManager();
-		int i = 0;
-		for(Section land: sm.getLandSections()){
-			System.out.println(i);
-			land.printSection(map);
-			i++;
-		}
-		
-		i = 0;
-		for(Section water: sm.getWaterSections()){
-			System.out.println(i);
-			water.printSection(map);
-			i++;
-		}
-		*/
 	}
 	
 	private void updateUsingLastMove(char[][] view){
@@ -145,14 +160,16 @@ public class SmartHunter2 implements Ai {
 		}
 	}
 	
+	//Agent calls this!
 	public char makeMove(char[][] view) {
-		char move = 'f';
+		char move = 'f'; //default move
 		update(view);
 		if(!commandBuffer.isEmpty()){
+			//use a predetermined move
 			move = commandBuffer.charAt(0);
 			commandBuffer = commandBuffer.substring(1);
 		}else{
-			//sets goal then gets commands for command buffer
+			//sets goal then gets commands for the command buffer
 			if(evaluateMove()){
 				move = commandBuffer.charAt(0);
 				commandBuffer = commandBuffer.substring(1);
@@ -233,8 +250,9 @@ public class SmartHunter2 implements Ai {
 				}
 			}
 		}
+		
+		//if there is nothing left to explore in our current section
 		if(beenTo.isSubset(currentSection)){
-			//System.out.println("can't explore more!");
 			//can cut down trees or blast walls or use raft to explore other sections
 			if(!onWater){
 				//on land
@@ -256,9 +274,7 @@ public class SmartHunter2 implements Ai {
 				}
 			}else{
 				//on water
-				//Section home = sm.getSection(0, 0, onWater);
 				Section sec = bestValueSectionFromWater(l);
-				//sec.printSection(map);
 				if(sec != null){
 					Integer[] getGoal = getClosestFromCurrentPosition(sec);
 					goal[0] = getGoal[0]; goal[1] = getGoal[1];
@@ -330,6 +346,7 @@ public class SmartHunter2 implements Ai {
 	
 	//use goal and find commands to reach the goal
 	//false if no commands are gotten
+	//a* search
 	private boolean getCommands(int[] goal){
 		Section visited = new Section(map.getDimensions());
 		Comparator<GameState> gsc = new GameStateComparator(false);
@@ -356,6 +373,7 @@ public class SmartHunter2 implements Ai {
 		}
 		return false;
 	}
+	//modified a* search (can only move)
 	private boolean getCommandsMove(int[] goal){
 		Section visited = new Section(map.getDimensions());
 		Comparator<GameState> gsc = new GameStateComparator(false);
@@ -380,55 +398,6 @@ public class SmartHunter2 implements Ai {
 				}
 			}
 		}
-		return false;
-	}
-	private boolean getCommandsAndBack(int[] goal){
-		Section visited = new Section(map.getDimensions());
-		boolean found = false;
-		Comparator<GameState> gsc = new GameStateComparator(false);
-		PriorityQueue<GameState> states = new PriorityQueue<GameState>(gsc);
-		GameState init = new GameState(position[0], position[1], currentDirection, hasRaft, onWater, numDynamite);
-		visited.setTrue(position[0], position[1]);
-		states.add(init);
-		GameState afterGoal = null;
-		while(!states.isEmpty() && !found){
-			GameState currentState = states.poll();
-			List<GameState> gs = getNeighbouringGameStates(currentState);
-			for(GameState next: gs){
-				if(next.checkGoal(goal)){
-					commandBuffer = next.getMoves();
-					//System.out.println(commandBuffer);
-					found = true;
-					afterGoal = next;
-					break;
-				}
-				int[] pos = next.getPosition();
-				if(!visited.getValue(pos[0], pos[1])){
-					next.calculateHeuristic(goal);
-					states.add(next);
-					visited.setTrue(pos[0], pos[1]);
-				}
-			}
-		}
-		if(!found) return false;
-		int[] backGoal = {0,0};
-		PriorityQueue<GameState> backStates = new PriorityQueue<GameState>(gsc);
-		backStates.add(afterGoal);
-		while(!backStates.isEmpty()){
-			GameState currentState = backStates.poll();
-			List<GameState> gs = getNeighbouringGameStates(currentState);
-			for(GameState next: gs){
-				if(next.checkGoal(backGoal)){
-					commandBuffer = next.getMoves();
-					//System.out.println(commandBuffer);
-					return true;
-				}
-				//int[] pos = next.getPosition();
-				next.calculateHeuristic(backGoal);
-				states.add(next);
-			}
-		}
-		
 		return false;
 	}
 	private List<GameState> getNeighbouringGameStates(GameState gs){
@@ -526,6 +495,8 @@ public class SmartHunter2 implements Ai {
 		}
 		return null;
 	}
+	
+	//gets neighbouring sections
 	private LinkedList<Section> reachableLandSections(Section sec){
 		SectionManager sm = map.getSectionManager();
 		//Section currentSection = sm.getSection(position[0], position[1], onWater);
@@ -609,23 +580,10 @@ public class SmartHunter2 implements Ai {
 		return outline.get(minIndex);
 		
 	}
-	private Integer[] getBestSquare(Section s){
-		LinkedList<Integer[]> outline = s.getOutline();
-		int min = 80*80; int index = 0; int minIndex = -1;
-		for(Integer[] pos: outline){
-			if(Math.abs(pos[0]-position[0])+Math.abs(pos[1]-position[1])<min){
-				min = Math.abs(pos[0]-position[0])+Math.abs(pos[1]-position[1]);
-				minIndex = index; 
-			}
-			index++;
-		}
-		if(minIndex == -1) return null;
-		return outline.get(minIndex);
-		
-	}
+	
 	private Section bestValueSectionFromWater(LinkedList<Section> ls){
-		SectionManager sm = map.getSectionManager();
-		Section currentSection = sm.getSection(position[0], position[1], onWater);
+		//SectionManager sm = map.getSectionManager();
+		//Section currentSection = sm.getSection(position[0], position[1], onWater);
 		boolean needKey = false;
 		//boolean needDynamite = false;
 		for(Section s: ls){
@@ -639,7 +597,6 @@ public class SmartHunter2 implements Ai {
 			int val = 1;
 			boolean hasTrees = false;
 			if(beenTo.isSubset(s)) continue;
-			//if(s.isEqual(currentSection)) continue;
 			for(Integer[] t: map.getTrees()){
 				if(s.isNextTo(t[0], t[1])) hasTrees = true;
 			}
